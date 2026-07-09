@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="A compliance dashboard to audit UK properties for EPC rating compliance and calculate potential MEES fine exposures." />
     <title>UK EPC Property Compliance Auditor</title>
+    <!-- Premium high-tech fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -12,10 +14,16 @@
       <!-- HEADER -->
       <header class="app-header">
         <div class="header-logo">
-          <span class="logo-icon">🇬🇧</span>
+          <!-- Premium SVG Flag -->
+          <div class="logo-flag-wrapper">
+            <svg viewBox="0 0 60 30" class="logo-uk-flag" aria-label="United Kingdom" role="img"><clipPath id="uk-clip"><rect width="60" height="30"></rect></clipPath><g clip-path="url(#uk-clip)"><rect width="60" height="30" fill="#012169"></rect><path d="M0,0 60,30 M60,0 0,30" stroke="#fff" stroke-width="6"></path><path d="M0,0 60,30 M60,0 0,30" stroke="#C8102E" stroke-width="4"></path><path d="M30,0 V30 M0,15 H60" stroke="#fff" stroke-width="10"></path><path d="M30,0 V30 M0,15 H60" stroke="#C8102E" stroke-width="6"></path></g></svg>
+          </div>
           <div>
-            <h1>UK EPC Property Compliance Auditor</h1>
-            <p class="subtitle">Minimum Energy Efficiency Standards (MEES) Portfolio Risk Scanner</p>
+            <div class="header-main-title">
+              <h1>MEES RISK SCANNER</h1>
+              <span class="header-org-tag">UK Gov Registry API Connected</span>
+            </div>
+            <p class="subtitle">UK EPC Property Compliance Auditor</p>
           </div>
         </div>
         <div class="header-badge" id="api-status-badge">
@@ -26,24 +34,36 @@
 
       <!-- METRICS GRID -->
       <section class="metrics-grid" aria-label="Portfolio Metrics Summary">
-        <div class="metric-card card-total">
-          <span class="metric-label">Audited Properties</span>
-          <strong class="metric-value" id="stat-total">0</strong>
+        <div class="metric-card card-total glow-info">
+          <div class="card-inner-header">
+            <span class="metric-label">Audited Properties</span>
+            <span class="card-icon text-info">🏢</span>
+          </div>
+          <strong class="metric-value font-mono" id="stat-total">0</strong>
           <span class="metric-subtext">Total active portfolio size</span>
         </div>
-        <div class="metric-card card-alert" id="metric-failed-card">
-          <span class="metric-label">Non-Compliant (F or G)</span>
-          <strong class="metric-value text-red" id="stat-noncompliant">0</strong>
+        <div class="metric-card card-alert glow-fail" id="metric-failed-card">
+          <div class="card-inner-header">
+            <span class="metric-label">Non-Compliant (F or G)</span>
+            <span class="card-icon text-fail">⚠️</span>
+          </div>
+          <strong class="metric-value text-glow-fail font-mono" id="stat-noncompliant">0</strong>
           <span class="metric-subtext">Properties below legal limit</span>
         </div>
-        <div class="metric-card card-fine" id="metric-fine-card">
-          <span class="metric-label">Est. Fine Exposure</span>
-          <strong class="metric-value text-amber" id="stat-fine">£0</strong>
+        <div class="metric-card card-fine glow-warn" id="metric-fine-card">
+          <div class="card-inner-header">
+            <span class="metric-label">Est. Fine Exposure</span>
+            <span class="card-icon text-warn">£</span>
+          </div>
+          <strong class="metric-value text-glow-warn font-mono" id="stat-fine">£0</strong>
           <span class="metric-subtext">Up to £5,000 per violation</span>
         </div>
-        <div class="metric-card card-success">
-          <span class="metric-label">Compliant (A - E)</span>
-          <strong class="metric-value text-green" id="stat-compliant">0</strong>
+        <div class="metric-card card-success glow-pass">
+          <div class="card-inner-header">
+            <span class="metric-label">Compliant (A - E)</span>
+            <span class="card-icon text-pass">🛡️</span>
+          </div>
+          <strong class="metric-value text-glow-pass font-mono" id="stat-compliant">0</strong>
           <span class="metric-subtext">Properties meeting MEES standard</span>
         </div>
       </section>
