@@ -57,9 +57,8 @@ app.post('/api/check', async (req, res) => {
     return res.status(400).json({ error: 'Provide a list of properties to check.' });
   }
 
-  const email = process.env.EPC_API_EMAIL;
   const key = process.env.EPC_API_KEY;
-  const isMockMode = !email || !key || key.includes('api-token') || req.query.mock === 'true';
+  const isMockMode = !key || key.includes('api-token') || key.includes('paste-your-received') || req.query.mock === 'true';
 
   console.log(`Checking batch of ${properties.length} properties (Mode: ${isMockMode ? 'MOCK' : 'LIVE'})`);
 
@@ -80,14 +79,14 @@ app.post('/api/check', async (req, res) => {
     }
 
     try {
-      const authString = Buffer.from(`${email}:${key}`).toString('base64');
-      const targetUrl = `https://epc.opendatacommunities.org/api/v1/domestic/search?postcode=${encodeURIComponent(postcode)}&size=30`;
+      // Query the correct new MHCLG domain name and endpoint path
+      const targetUrl = `https://api.get-energy-performance-data.communities.gov.uk/api/domestic/search?postcode=${encodeURIComponent(postcode)}&page_size=100`;
 
       const apiResponse = await fetch(targetUrl, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'Authorization': `Basic ${authString}`
+          'Authorization': `Bearer ${key}`
         }
       });
 
@@ -96,7 +95,7 @@ app.post('/api/check', async (req, res) => {
       }
 
       const rawData = await apiResponse.json();
-      const rows = rawData.rows || [];
+      const rows = rawData.data || [];
 
       // Attempt to find the best match for the specific address number/name
       let match = rows[0]; // fallback to first property in postcode if no specific match
@@ -104,7 +103,7 @@ app.post('/api/check', async (req, res) => {
         const numberMatch = address.match(/^\d+/);
         if (numberMatch) {
           const houseNum = numberMatch[0];
-          const found = rows.find(r => String(r.address || '').includes(houseNum));
+          const found = rows.find(r => String(r.addressLine1 || '').includes(houseNum));
           if (found) match = found;
         }
       }
@@ -118,20 +117,30 @@ app.post('/api/check', async (req, res) => {
         continue;
       }
 
+      // Format Expiry Date (registrationDate + 10 years)
+      let certificateExpiry = 'N/A';
+      if (match.registrationDate && match.registrationDate !== 'N/A') {
+        try {
+          const regDate = new Date(match.registrationDate);
+          regDate.setFullYear(regDate.getFullYear() + 10);
+          certificateExpiry = regDate.toISOString().split('T')[0];
+        } catch (e) {
+          // ignore date error
+        }
+      }
+
       results.push({
-        address: match.address || address,
+        address: match.addressLine1 ? `${match.addressLine1}${match.addressLine2 ? ', ' + match.addressLine2 : ''}` : address,
         postcode: match.postcode || postcode,
-        currentEnergyRating: match['current-energy-rating'] || 'N/A',
-        potentialEnergyRating: match['potential-energy-rating'] || 'N/A',
-        currentEnergyEfficiency: Number(match['current-energy-efficiency'] || 0),
-        potentialEnergyEfficiency: Number(match['potential-energy-efficiency'] || 0),
-        inspectionDate: match['inspection-date'] || 'N/A',
-        certificateExpiry: match['lodgement-datetime'] 
-          ? new Date(new Date(match['lodgement-datetime']).setFullYear(new Date(match['lodgement-datetime']).getFullYear() + 10)).toISOString().split('T')[0]
-          : 'N/A',
-        propertyType: match['property-type'] || 'Unknown',
-        localAuthority: match['local-authority-label'] || 'Unknown',
-        constituency: match['constituency-label'] || 'Unknown',
+        currentEnergyRating: match.currentEnergyEfficiencyBand || 'N/A',
+        potentialEnergyRating: 'N/A', // Detail omitted in bulk search schema
+        currentEnergyEfficiency: 'N/A',
+        potentialEnergyEfficiency: 'N/A',
+        inspectionDate: match.registrationDate || 'N/A',
+        certificateExpiry,
+        propertyType: 'Domestic Property',
+        localAuthority: match.council || 'Unknown',
+        constituency: match.constituency || 'Unknown',
         source: 'live_registry'
       });
 
@@ -151,6 +160,6 @@ app.post('/api/check', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`UK EPC Compliance Tracker running at http://localhost:${PORT}`);
   if (!process.env.EPC_API_KEY) {
-    console.log('Running in MOCK mode. Set EPC_API_EMAIL & EPC_API_KEY in .env for live registry integration.');
+    console.log('Running in MOCK mode. Set EPC_API_KEY in .env for live registry integration.');
   }
 });
