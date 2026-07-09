@@ -103,7 +103,8 @@ app.post('/api/check', async (req, res) => {
         const numberMatch = address.match(/^\d+/);
         if (numberMatch) {
           const houseNum = numberMatch[0];
-          const found = rows.find(r => String(r.addressLine1 || '').includes(houseNum));
+          const regex = new RegExp(`\\b${houseNum}\\b`);
+          const found = rows.find(r => regex.test(String(r.addressLine1 || '')));
           if (found) match = found;
         }
       }
