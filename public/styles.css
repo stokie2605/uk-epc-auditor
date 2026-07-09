@@ -783,6 +783,31 @@ body {
   to { transform: scale(1); opacity: 1; }
 }
 
+/* Access Code Inputs */
+.access-code-input {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--text-primary);
+  font-size: 13px;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+
+.access-code-input:focus {
+  outline: none;
+  border-color: var(--color-amber);
+}
+
+.settings-hint {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-top: 8px;
+  display: block;
+}
+
 /* Custom CSS Print Rules */
 @media print {
   body {

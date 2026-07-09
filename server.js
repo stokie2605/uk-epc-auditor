@@ -57,13 +57,21 @@ function generateMockEpc(address, postcode, category = 'domestic') {
 
 // GET endpoint to proxy detailed certificate metrics & upgrade recommendations
 app.get('/api/certificate-details', async (req, res) => {
-  const { certificateNumber } = req.query;
+  const { certificateNumber, accessCode } = req.query;
   if (!certificateNumber) {
     return res.status(400).json({ error: 'Missing certificateNumber parameter.' });
   }
 
   const key = process.env.EPC_API_KEY;
-  const isMockMode = !key || key.includes('api-token') || key.includes('paste-your-received') || req.query.mock === 'true';
+  const adminCode = process.env.GUEST_ACCESS_CODE || 'Alsager2026';
+  const isCodeValid = String(accessCode || '').trim() === adminCode.trim();
+
+  let isMockMode = !key || key.includes('api-token') || key.includes('paste-your-received') || req.query.mock === 'true';
+
+  // Force mock mode if live query attempted without valid access code
+  if (!isMockMode && !isCodeValid && !certificateNumber.startsWith('MOCK-')) {
+    isMockMode = true;
+  }
 
   if (isMockMode || certificateNumber.startsWith('MOCK-')) {
     // Generate deterministic mock improvements
@@ -153,15 +161,25 @@ app.get('/api/certificate-details', async (req, res) => {
 
 // POST endpoint for auditing a batch of properties
 app.post('/api/check', async (req, res) => {
-  const { properties, category = 'domestic' } = req.body;
+  const { properties, category = 'domestic', accessCode } = req.body;
   if (!Array.isArray(properties) || properties.length === 0) {
     return res.status(400).json({ error: 'Provide a list of properties to check.' });
   }
 
   const key = process.env.EPC_API_KEY;
-  const isMockMode = !key || key.includes('api-token') || key.includes('paste-your-received') || req.query.mock === 'true';
+  const adminCode = process.env.GUEST_ACCESS_CODE || 'Alsager2026';
+  const isCodeValid = String(accessCode || '').trim() === adminCode.trim();
 
-  console.log(`Checking batch of ${properties.length} properties (Mode: ${isMockMode ? 'MOCK' : 'LIVE'}, Category: ${category.toUpperCase()})`);
+  let isMockMode = !key || key.includes('api-token') || key.includes('paste-your-received') || req.query.mock === 'true';
+  let isMockedByAccessCode = false;
+
+  // Force guest preview mock mode if live check attempted without valid code
+  if (!isMockMode && !isCodeValid) {
+    isMockMode = true;
+    isMockedByAccessCode = true;
+  }
+
+  console.log(`Checking batch of ${properties.length} properties (Mode: ${isMockMode ? 'MOCK' : 'LIVE'}, Category: ${category.toUpperCase()}, Auth: ${isCodeValid ? 'VALID' : 'GUEST'})`);
 
   const results = [];
 
@@ -304,7 +322,6 @@ app.post('/api/check', async (req, res) => {
         propertyType: category === 'commercial' ? 'Commercial Building' : 'Domestic Property',
         localAuthority: match.council || 'Unknown',
         constituency: match.constituency || 'Unknown',
-        category: category,
         source: 'live_registry'
       });
 
@@ -318,7 +335,7 @@ app.post('/api/check', async (req, res) => {
     }
   }
 
-  res.json({ results });
+  res.json({ results, isMockedByAccessCode });
 });
 
 app.listen(PORT, () => {

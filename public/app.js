@@ -36,6 +36,10 @@ const elements = {
   // Category Selectors
   categoryDomestic: document.getElementById('category-domestic'),
   categoryCommercial: document.getElementById('category-commercial'),
+
+  // Access Code
+  accessCodeWrapper: document.getElementById('access-code-wrapper'),
+  inputAccessCode: document.getElementById('input-access-code'),
   
   // Alerts
   expiryAlertBanner: document.getElementById('expiry-alert-banner'),
@@ -72,7 +76,7 @@ function init() {
   elements.btnClear.addEventListener('click', clearLedger);
   elements.btnExportPdf.addEventListener('click', () => window.print());
   elements.btnExportIcal.addEventListener('click', downloadIcsCalendarEvents);
-  elements.mockToggle.addEventListener('change', updateApiBadgeStatus);
+  elements.mockToggle.addEventListener('change', updateMockToggleView);
   elements.btnCloseModal.addEventListener('click', closeModal);
   
   // Category change triggers stats update
@@ -91,6 +95,13 @@ function init() {
   elements.dropZone.addEventListener('dragleave', () => elements.dropZone.classList.remove('active'));
   elements.dropZone.addEventListener('drop', handleFileDrop);
 
+  updateMockToggleView();
+}
+
+// Toggle Access Code visibility and update status badge
+function updateMockToggleView() {
+  const isMock = elements.mockToggle.checked;
+  elements.accessCodeWrapper.style.display = isMock ? 'none' : 'block';
   updateApiBadgeStatus();
 }
 
@@ -101,10 +112,10 @@ function updateApiBadgeStatus() {
   
   if (isMock) {
     elements.apiBadgeText.textContent = 'Offline Demo Active';
-    dot.classList.remove('active');
+    dot.className = 'badge-dot';
   } else {
     elements.apiBadgeText.textContent = 'Live UK Registry Target';
-    dot.classList.add('active');
+    dot.className = 'badge-dot active';
   }
 }
 
@@ -197,6 +208,7 @@ function parseAndScanCsv(file) {
 async function scanProperties(propsList) {
   const isMock = elements.mockToggle.checked;
   const category = elements.categoryCommercial.checked ? 'commercial' : 'domestic';
+  const accessCode = elements.inputAccessCode.value.trim();
   const url = `/api/check${isMock ? '?mock=true' : ''}`;
 
   try {
@@ -205,7 +217,7 @@ async function scanProperties(propsList) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ properties: propsList, category })
+      body: JSON.stringify({ properties: propsList, category, accessCode })
     });
 
     if (!response.ok) throw new Error('API server returned an error.');
@@ -234,6 +246,15 @@ async function scanProperties(propsList) {
     sessionStorage.setItem('epc-portfolio-ledger', JSON.stringify(portfolio));
     updateDashboard();
 
+    // Check if backend forced guest mode
+    if (data.isMockedByAccessCode) {
+      elements.apiBadgeText.textContent = 'Guest Preview (Live Locked)';
+      elements.apiBadge.querySelector('.badge-dot').className = 'badge-dot';
+      alert('Guest Preview Active: Live database audits are locked. Scans are running in Guest Mode (Mock Data). Enter the Admin Access Code in the settings panel to unlock live government registry audits.');
+    } else {
+      updateMockToggleView();
+    }
+
   } catch (err) {
     alert(`Audit run failed: ${err.message}`);
   }
@@ -248,12 +269,12 @@ async function loadSampleMockData() {
   // Temporarily force mock toggle on
   const prevToggle = elements.mockToggle.checked;
   elements.mockToggle.checked = true;
-  updateApiBadgeStatus();
+  updateMockToggleView();
 
   await scanProperties(sampleMockPortfolio);
 
   elements.mockToggle.checked = prevToggle;
-  updateApiBadgeStatus();
+  updateMockToggleView();
   
   elements.btnSample.disabled = false;
   elements.btnSample.textContent = originalText;
@@ -279,7 +300,8 @@ async function showUpgradeDetails(certificateNumber, address) {
 
   try {
     const isMock = elements.mockToggle.checked;
-    const url = `/api/certificate-details?certificateNumber=${encodeURIComponent(certificateNumber)}${isMock ? '&mock=true' : ''}`;
+    const accessCode = elements.inputAccessCode.value.trim();
+    const url = `/api/certificate-details?certificateNumber=${encodeURIComponent(certificateNumber)}&accessCode=${encodeURIComponent(accessCode)}${isMock ? '&mock=true' : ''}`;
     
     const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to query certificate details.');

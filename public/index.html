@@ -94,14 +94,19 @@
             <button id="btn-load-sample" class="btn btn-secondary">Load Sample Mock Portfolio</button>
           </div>
 
-          <!-- MOCK SWITCH -->
+          <!-- MOCK SWITCH & ACCESS CODE -->
           <div class="control-section settings-section">
-            <h3>Registry Target Mode</h3>
+            <h3>Registry Target Connection</h3>
             <label class="switch-container">
               <input type="checkbox" id="mock-mode-toggle" checked />
               <span class="slider"></span>
-              <span class="label-text">Force Mock Mode (Offline Demo)</span>
+              <span class="label-text">Force Mock Mode (Guest Preview)</span>
             </label>
+            <div id="access-code-wrapper" style="margin-top: 14px; display: none;">
+              <label for="input-access-code" style="font-size: 11px; font-weight: bold; color: var(--text-secondary); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Admin Access Code</label>
+              <input type="password" id="input-access-code" placeholder="Enter code for live audits" class="access-code-input" />
+              <span class="settings-hint">Leave checkbox ON to audit using guest mock data. Turn OFF and enter the access code to unlock live government registry audits.</span>
+            </div>
           </div>
         </aside>
 
