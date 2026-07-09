@@ -791,6 +791,18 @@ tr.group:hover .chevron-action {
   color: var(--color-pass);
 }
 
+.print-only {
+  display: none;
+}
+
+.ledger-main-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  flex: 1;
+}
+
 /* Print Styles */
 @media print {
   body {

@@ -88,9 +88,9 @@
         </section>
 
         <!-- MAIN CONTENT WORKSPACE -->
-        <div class="flex flex-col gap-6 lg:flex-row">
+        <div class="workspace-layout">
           <!-- SIDEBAR CONTROL PANEL -->
-          <aside class="no-print flex w-full flex-col gap-4 lg:w-[300px] lg:shrink-0">
+          <aside class="control-panel no-print">
             <!-- Category Segmented Switcher -->
             <div class="glass rounded-2xl border border-border p-1.5">
               <div class="grid grid-cols-2 gap-1.5">
@@ -176,7 +176,7 @@
           </aside>
 
           <!-- LEDGER DATA LIST & TABLE -->
-          <div class="flex min-w-0 flex-1 flex-col gap-4">
+          <div class="ledger-main-container">
             <!-- Expiry Warning Alert Banner -->
             <div class="animate-banner-slide no-print flex flex-col gap-3 rounded-2xl border border-warn/40 bg-warn/10 p-4 glow-warn sm:flex-row sm:items-center sm:justify-between" id="expiry-alert-banner" style="display: none;">
               <div class="flex items-start gap-3">
