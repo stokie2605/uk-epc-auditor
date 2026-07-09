@@ -90,6 +90,15 @@ app.post('/api/check', async (req, res) => {
         }
       });
 
+      if (apiResponse.status === 404) {
+        results.push({
+          address: address || 'Postcode Area Search',
+          postcode,
+          error: 'No domestic EPC records found in registry for this postcode.'
+        });
+        continue;
+      }
+
       if (!apiResponse.ok) {
         throw new Error(`Government registry responded with status: ${apiResponse.status}`);
       }
