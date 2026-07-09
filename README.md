@@ -2,6 +2,8 @@
 
 An automated compliance dashboard designed for private landlords, property letting agents, and UK housing managers to scan property portfolios for Energy Performance Certificate (EPC) ratings, identify non-compliant properties, and project potential fine liabilities.
 
+![Dashboard Preview](./screenshots/dashboard-preview.jpg)
+
 ---
 
 ## 🏛️ Business Case & Compliance Context
