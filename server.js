@@ -97,27 +97,59 @@ app.post('/api/check', async (req, res) => {
       const rawData = await apiResponse.json();
       const rows = rawData.data || [];
 
-      // Attempt to find the best match for the specific address number/name
-      let match = null;
-      if (address) {
-        const numberMatch = address.match(/^\d+/);
-        if (numberMatch) {
-          const houseNum = numberMatch[0];
-          // Look for:
-          // 1. Starts with house number: e.g. "9 Bankside"
-          // 2. Starts with Flat/Apartment/Unit + house number: e.g. "Flat 9"
-          // 3. Starts with house number + comma: e.g. "9, Bankside"
-          const regexes = [
-            new RegExp(`^${houseNum}\\b`, 'i'),
-            new RegExp(`\\b(flat|apartment|unit|room|suite|no|no.)\\s+${houseNum}\\b`, 'i'),
-            new RegExp(`^${houseNum},`, 'i')
-          ];
-          
-          match = rows.find(r => {
-            const addrStr = String(r.addressLine1 || '');
-            return regexes.some(rx => rx.test(addrStr));
+      // If no address is specified, expand the search to return ALL properties in this postcode
+      if (!address) {
+        if (rows.length === 0) {
+          results.push({
+            address: 'Postcode Area Search',
+            postcode,
+            error: 'No EPC records found in registry for this postcode.'
           });
+        } else {
+          for (const match of rows) {
+            let certificateExpiry = 'N/A';
+            if (match.registrationDate && match.registrationDate !== 'N/A') {
+              try {
+                const regDate = new Date(match.registrationDate);
+                regDate.setFullYear(regDate.getFullYear() + 10);
+                certificateExpiry = regDate.toISOString().split('T')[0];
+              } catch (e) {}
+            }
+
+            results.push({
+              address: match.addressLine1 ? `${match.addressLine1}${match.addressLine2 ? ', ' + match.addressLine2 : ''}` : 'Unknown Address',
+              postcode: match.postcode || postcode,
+              currentEnergyRating: match.currentEnergyEfficiencyBand || 'N/A',
+              potentialEnergyRating: 'N/A',
+              currentEnergyEfficiency: 'N/A',
+              potentialEnergyEfficiency: 'N/A',
+              inspectionDate: match.registrationDate || 'N/A',
+              certificateExpiry,
+              propertyType: 'Domestic Property',
+              localAuthority: match.council || 'Unknown',
+              constituency: match.constituency || 'Unknown',
+              source: 'live_registry'
+            });
+          }
         }
+        continue;
+      }
+
+      // If an address was specified, perform our strict matching
+      let match = null;
+      const numberMatch = address.match(/^\d+/);
+      if (numberMatch) {
+        const houseNum = numberMatch[0];
+        const regexes = [
+          new RegExp(`^${houseNum}\\b`, 'i'),
+          new RegExp(`\\b(flat|apartment|unit|room|suite|no|no.)\\s+${houseNum}\\b`, 'i'),
+          new RegExp(`^${houseNum},`, 'i')
+        ];
+        
+        match = rows.find(r => {
+          const addrStr = String(r.addressLine1 || '');
+          return regexes.some(rx => rx.test(addrStr));
+        });
       }
 
       // If no strict address match was found, fallback to the first row in the postcode
@@ -150,7 +182,7 @@ app.post('/api/check', async (req, res) => {
         address: match.addressLine1 ? `${match.addressLine1}${match.addressLine2 ? ', ' + match.addressLine2 : ''}` : address,
         postcode: match.postcode || postcode,
         currentEnergyRating: match.currentEnergyEfficiencyBand || 'N/A',
-        potentialEnergyRating: 'N/A', // Detail omitted in bulk search schema
+        potentialEnergyRating: 'N/A',
         currentEnergyEfficiency: 'N/A',
         potentialEnergyEfficiency: 'N/A',
         inspectionDate: match.registrationDate || 'N/A',
