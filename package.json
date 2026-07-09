@@ -1,0 +1,14 @@
+{
+  "name": "uk-epc-compliance-tracker",
+  "version": "1.0.0",
+  "description": "A micro-SaaS dashboard to scan properties for UK Energy Performance Certificate (EPC) ratings, identifying F/G compliance risks and calculating potential council fines.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}

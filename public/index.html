@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A compliance dashboard to audit UK properties for EPC rating compliance and calculate potential MEES fine exposures." />
+    <title>UK EPC Property Compliance Auditor</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- HEADER -->
+      <header class="app-header">
+        <div class="header-logo">
+          <span class="logo-icon">🇬🇧</span>
+          <div>
+            <h1>UK EPC Property Compliance Auditor</h1>
+            <p class="subtitle">Minimum Energy Efficiency Standards (MEES) Portfolio Risk Scanner</p>
+          </div>
+        </div>
+        <div class="header-badge" id="api-status-badge">
+          <span class="badge-dot"></span>
+          <span id="api-status-text">Ollama/Mock Mode Active</span>
+        </div>
+      </header>
+
+      <!-- METRICS GRID -->
+      <section class="metrics-grid" aria-label="Portfolio Metrics Summary">
+        <div class="metric-card card-total">
+          <span class="metric-label">Audited Properties</span>
+          <strong class="metric-value" id="stat-total">0</strong>
+          <span class="metric-subtext">Total active portfolio size</span>
+        </div>
+        <div class="metric-card card-alert" id="metric-failed-card">
+          <span class="metric-label">Non-Compliant (F or G)</span>
+          <strong class="metric-value text-red" id="stat-noncompliant">0</strong>
+          <span class="metric-subtext">Properties below legal limit</span>
+        </div>
+        <div class="metric-card card-fine" id="metric-fine-card">
+          <span class="metric-label">Est. Fine Exposure</span>
+          <strong class="metric-value text-amber" id="stat-fine">£0</strong>
+          <span class="metric-subtext">Up to £5,000 per violation</span>
+        </div>
+        <div class="metric-card card-success">
+          <span class="metric-label">Compliant (A - E)</span>
+          <strong class="metric-value text-green" id="stat-compliant">0</strong>
+          <span class="metric-subtext">Properties meeting MEES standard</span>
+        </div>
+      </section>
+
+      <!-- MAIN WORKSPACE -->
+      <div class="workspace-layout">
+        <!-- LEFT CONTROL PANEL -->
+        <aside class="control-panel" aria-labelledby="controls-title">
+          <h2 id="controls-title" class="panel-heading">Portfolio Inputs</h2>
+
+          <!-- MANUAL ENTRY -->
+          <div class="control-section">
+            <h3>Manual Property Check</h3>
+            <form id="single-check-form" class="check-form">
+              <label for="input-address">Street Address</label>
+              <input type="text" id="input-address" placeholder="e.g. 10 High Street" />
+
+              <label for="input-postcode">Postcode <span class="required">*</span></label>
+              <input type="text" id="input-postcode" placeholder="e.g. ST5 1QA" required />
+
+              <button type="submit" class="btn btn-primary">Scan Single Property</button>
+            </form>
+          </div>
+
+          <!-- BATCH UPLOAD -->
+          <div class="control-section">
+            <h3>Bulk Portfolio CSV Upload</h3>
+            <p class="section-help">Upload a CSV file containing <code>address</code> and <code>postcode</code> columns.</p>
+            <div class="file-upload-zone" id="drop-zone">
+              <input type="file" id="file-input" accept=".csv" class="hidden-file-input" />
+              <div class="upload-inner">
+                <span class="upload-icon">📥</span>
+                <p>Drag & drop CSV or <span class="link-text">browse files</span></p>
+              </div>
+            </div>
+            <button id="btn-load-sample" class="btn btn-secondary">Load Sample Mock Portfolio</button>
+          </div>
+
+          <!-- MOCK SWITCH -->
+          <div class="control-section settings-section">
+            <h3>Registry Target Mode</h3>
+            <label class="switch-container">
+              <input type="checkbox" id="mock-mode-toggle" checked />
+              <span class="slider"></span>
+              <span class="label-text">Force Mock Mode (Offline Demo)</span>
+            </label>
+          </div>
+        </aside>
+
+        <!-- RIGHT DATA PANEL -->
+        <main class="data-panel" aria-labelledby="data-title">
+          <div class="panel-header">
+            <h2 id="data-title" class="panel-heading">Audit Ledger</h2>
+            <button id="btn-clear-ledger" class="btn btn-danger" style="display: none;">Clear Ledger</button>
+          </div>
+
+          <div class="ledger-container">
+            <table class="ledger-table" id="ledger-table">
+              <thead>
+                <tr>
+                  <th>Property Address</th>
+                  <th>Postcode</th>
+                  <th>EPC Rating</th>
+                  <th>Efficiency (Current / Potential)</th>
+                  <th>Expiry Date</th>
+                  <th>Compliance Status</th>
+                </tr>
+              </thead>
+              <tbody id="ledger-body">
+                <tr class="empty-state">
+                  <td colspan="6">
+                    <div class="table-empty-message">
+                      <span class="empty-icon">🏢</span>
+                      <h4>No properties audited yet</h4>
+                      <p>Use the inputs panel on the left to scan a postcode or upload your property CSV database.</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>
