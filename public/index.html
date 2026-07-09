@@ -54,6 +54,18 @@
         <aside class="control-panel" aria-labelledby="controls-title">
           <h2 id="controls-title" class="panel-heading">Portfolio Inputs</h2>
 
+          <!-- AUDITING CATEGORY SEGMENTED TOGGLE -->
+          <div class="control-section">
+            <h3>Auditing Portfolio Category</h3>
+            <div class="category-toggle-container">
+              <input type="radio" id="category-domestic" name="audit-category" value="domestic" checked />
+              <label for="category-domestic" class="toggle-label label-left">Residential</label>
+              
+              <input type="radio" id="category-commercial" name="audit-category" value="commercial" />
+              <label for="category-commercial" class="toggle-label label-right">Commercial</label>
+            </div>
+          </div>
+
           <!-- MANUAL ENTRY -->
           <div class="control-section">
             <h3>Manual Property Check</h3>
@@ -97,7 +109,21 @@
         <main class="data-panel" aria-labelledby="data-title">
           <div class="panel-header">
             <h2 id="data-title" class="panel-heading">Audit Ledger</h2>
-            <button id="btn-clear-ledger" class="btn btn-danger" style="display: none;">Clear Ledger</button>
+            <div class="panel-actions">
+              <button id="btn-export-pdf" class="btn btn-secondary" style="display: none; margin-right: 8px;">Export PDF Report</button>
+              <button id="btn-clear-ledger" class="btn btn-danger" style="display: none;">Clear Ledger</button>
+            </div>
+          </div>
+
+          <!-- EXPIRY WARNING BANNER -->
+          <div class="expiry-alert-banner" id="expiry-alert-banner" style="display: none;">
+            <div class="alert-left">
+              <span class="alert-icon">⚠️</span>
+              <div class="alert-details">
+                <strong>EPC Renewals Required:</strong> <span id="expiry-alert-count">0</span> certificate(s) in this portfolio are expiring within 12 months.
+              </div>
+            </div>
+            <button id="btn-export-ical" class="btn btn-alert-action">Download Calendar Reminders</button>
           </div>
 
           <div class="ledger-container">
@@ -128,6 +154,35 @@
         </main>
       </div>
     </div>
+    <!-- RECOMMENDATIONS MODAL -->
+    <div class="modal-overlay" id="recommendations-modal" style="display: none;">
+      <div class="modal-card">
+        <header class="modal-header">
+          <div>
+            <h2 id="modal-property-address">Property Address</h2>
+            <p class="modal-subtitle">EPC Improvement Action Plan</p>
+          </div>
+          <button id="btn-close-modal" class="modal-close-btn">&times;</button>
+        </header>
+        <div class="modal-body">
+          <div class="modal-stats-grid">
+            <div class="modal-stat-card">
+              <span class="m-label">Current EPC Rating</span>
+              <strong class="m-value" id="modal-rating-current">?</strong>
+            </div>
+            <div class="modal-stat-card">
+              <span class="m-label">Potential EPC Rating</span>
+              <strong class="m-value text-green" id="modal-rating-potential">?</strong>
+            </div>
+          </div>
+          <h3 class="modal-section-heading">Recommended Upgrade Steps</h3>
+          <div class="recommendations-list" id="modal-recommendations-list">
+            <!-- Dynamic improvements list -->
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="./app.js"></script>
   </body>
 </html>

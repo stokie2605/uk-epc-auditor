@@ -1,6 +1,7 @@
 // App State Manager
 let portfolio = [];
-const MEES_FINE_LIMIT = 5000;
+const MEES_FINE_LIMIT_DOMESTIC = 5000;
+const MEES_FINE_LIMIT_COMMERCIAL = 150000;
 
 // Sample properties for the mock portfolio demo
 const sampleMockPortfolio = [
@@ -22,6 +23,7 @@ const elements = {
   fileInput: document.getElementById('file-input'),
   btnSample: document.getElementById('btn-load-sample'),
   btnClear: document.getElementById('btn-clear-ledger'),
+  btnExportPdf: document.getElementById('btn-export-pdf'),
   mockToggle: document.getElementById('mock-mode-toggle'),
   statTotal: document.getElementById('stat-total'),
   statNonCompliant: document.getElementById('stat-noncompliant'),
@@ -29,7 +31,24 @@ const elements = {
   statCompliant: document.getElementById('stat-compliant'),
   ledgerBody: document.getElementById('ledger-body'),
   apiBadge: document.getElementById('api-status-badge'),
-  apiBadgeText: document.getElementById('api-status-text')
+  apiBadgeText: document.getElementById('api-status-text'),
+  
+  // Category Selectors
+  categoryDomestic: document.getElementById('category-domestic'),
+  categoryCommercial: document.getElementById('category-commercial'),
+  
+  // Alerts
+  expiryAlertBanner: document.getElementById('expiry-alert-banner'),
+  expiryAlertCount: document.getElementById('expiry-alert-count'),
+  btnExportIcal: document.getElementById('btn-export-ical'),
+  
+  // Modal
+  modal: document.getElementById('recommendations-modal'),
+  modalAddress: document.getElementById('modal-property-address'),
+  modalRatingCurrent: document.getElementById('modal-rating-current'),
+  modalRatingPotential: document.getElementById('modal-rating-potential'),
+  modalRecommendationsList: document.getElementById('modal-recommendations-list'),
+  btnCloseModal: document.getElementById('btn-close-modal')
 };
 
 // Start application
@@ -51,9 +70,21 @@ function init() {
   elements.singleForm.addEventListener('submit', handleSingleCheck);
   elements.btnSample.addEventListener('click', loadSampleMockData);
   elements.btnClear.addEventListener('click', clearLedger);
+  elements.btnExportPdf.addEventListener('click', () => window.print());
+  elements.btnExportIcal.addEventListener('click', downloadIcsCalendarEvents);
   elements.mockToggle.addEventListener('change', updateApiBadgeStatus);
+  elements.btnCloseModal.addEventListener('click', closeModal);
   
-  // File Upload Handlers
+  // Category change triggers stats update
+  elements.categoryDomestic.addEventListener('change', updateDashboard);
+  elements.categoryCommercial.addEventListener('change', updateDashboard);
+  
+  // Modal background click closing
+  window.addEventListener('click', (e) => {
+    if (e.target === elements.modal) closeModal();
+  });
+
+  // File Drag-and-Drop Handlers
   elements.dropZone.addEventListener('click', () => elements.fileInput.click());
   elements.fileInput.addEventListener('change', handleFileSelection);
   elements.dropZone.addEventListener('dragover', (e) => { e.preventDefault(); elements.dropZone.classList.add('active'); });
@@ -109,6 +140,7 @@ function handleFileSelection(e) {
   if (file) parseAndScanCsv(file);
 }
 
+// CSV Drag and Drop
 function handleFileDrop(e) {
   e.preventDefault();
   elements.dropZone.classList.remove('active');
@@ -164,6 +196,7 @@ function parseAndScanCsv(file) {
 // Core API query function
 async function scanProperties(propsList) {
   const isMock = elements.mockToggle.checked;
+  const category = elements.categoryCommercial.checked ? 'commercial' : 'domestic';
   const url = `/api/check${isMock ? '?mock=true' : ''}`;
 
   try {
@@ -172,7 +205,7 @@ async function scanProperties(propsList) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ properties: propsList })
+      body: JSON.stringify({ properties: propsList, category })
     });
 
     if (!response.ok) throw new Error('API server returned an error.');
@@ -186,6 +219,10 @@ async function scanProperties(propsList) {
         p.postcode.toUpperCase() === newProp.postcode.toUpperCase() && 
         p.address.toLowerCase() === newProp.address.toLowerCase()
       );
+      
+      // Keep category tagged on each property
+      newProp.category = category;
+
       if (idx !== -1) {
         portfolio[idx] = newProp;
       } else {
@@ -230,16 +267,130 @@ function clearLedger() {
   }
 }
 
+// Detailed upgrade instructions modal loader
+async function showUpgradeDetails(certificateNumber, address) {
+  if (!certificateNumber || certificateNumber === 'N/A' || certificateNumber.includes('Error')) return;
+
+  elements.modalAddress.textContent = address;
+  elements.modalRatingCurrent.textContent = '...';
+  elements.modalRatingPotential.textContent = '...';
+  elements.modalRecommendationsList.innerHTML = '<div style="text-align:center; padding: 30px;">Loading EPC upgrade recommendations...</div>';
+  elements.modal.style.display = 'flex';
+
+  try {
+    const isMock = elements.mockToggle.checked;
+    const url = `/api/certificate-details?certificateNumber=${encodeURIComponent(certificateNumber)}${isMock ? '&mock=true' : ''}`;
+    
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to query certificate details.');
+
+    const data = await response.json();
+
+    // Render Stats
+    elements.modalRatingCurrent.textContent = data.currentEnergyEfficiencyBand || '?';
+    elements.modalRatingCurrent.className = `m-value rating-badge rating-${data.currentEnergyEfficiencyBand || 'N'}`;
+    elements.modalRatingPotential.textContent = data.potentialEnergyEfficiencyBand || '?';
+    elements.modalRatingPotential.className = `m-value rating-badge rating-${data.potentialEnergyEfficiencyBand || 'N'}`;
+
+    // Render upgrade list
+    const imps = data.suggested_improvements || [];
+    if (imps.length === 0) {
+      elements.modalRecommendationsList.innerHTML = `
+        <div style="text-align:center; padding: 20px; color: var(--text-secondary);">
+          🎉 No upgrades required! This building already meets optimum energy efficiency levels.
+        </div>
+      `;
+    } else {
+      elements.modalRecommendationsList.innerHTML = imps.map((imp, index) => {
+        const cost = imp.indicative_cost || imp.indicativeCost || 'N/A';
+        const saving = imp.typical_saving && imp.typical_saving.value 
+          ? `£${imp.typical_saving.value.toLocaleString('en-GB')}/year` 
+          : 'N/A';
+
+        return `
+          <div class="recommendation-item">
+            <span class="rec-number">${index + 1}</span>
+            <div class="rec-details">
+              <h4 class="rec-title">${imp.improvement_description}</h4>
+              <div class="rec-info-grid">
+                <span class="rec-info-item">Est. Cost: <strong>${cost}</strong></span>
+                <span class="rec-info-item">Est. Saving: <strong>${saving}</strong></span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+  } catch (err) {
+    elements.modalRecommendationsList.innerHTML = `
+      <div style="text-align:center; padding: 20px; color: var(--color-red-text);">
+        Could not retrieve upgrade recommendations: ${err.message}
+      </div>
+    `;
+  }
+}
+
+function closeModal() {
+  elements.modal.style.display = 'none';
+}
+
+// Generate calendar event renewal notifications
+function downloadIcsCalendarEvents() {
+  const today = new Date();
+  const nextYear = new Date();
+  nextYear.setFullYear(today.getFullYear() + 1);
+
+  // Find expiring soon
+  const expiring = portfolio.filter(p => {
+    if (!p.certificateExpiry || p.certificateExpiry === 'N/A' || p.error) return false;
+    const exp = new Date(p.certificateExpiry);
+    return exp > today && exp <= nextYear;
+  });
+
+  if (expiring.length === 0) return;
+
+  let icsContent = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//UK EPC Auditor//Renewal Alerts//EN\r\n";
+
+  expiring.forEach((p, idx) => {
+    const expDate = new Date(p.certificateExpiry);
+    const dateStr = expDate.toISOString().replace(/-|:|\.\d+/g, "").split("T")[0]; // YYYYMMDD
+    const stampStr = new Date().toISOString().replace(/-|:|\.\d+/g, "").split("T")[0];
+
+    icsContent += "BEGIN:VEVENT\r\n";
+    icsContent += `UID:epc-renewal-${idx}-${Date.now()}@ukepcauditor.com\r\n`;
+    icsContent += `DTSTAMP:${stampStr}T000000Z\r\n`;
+    icsContent += `DTSTART;VALUE=DATE:${dateStr}\r\n`;
+    icsContent += `SUMMARY:EPC Expiry: ${p.address.replace(/,/g, '\\,')}\r\n`;
+    icsContent += `DESCRIPTION:The Energy Performance Certificate (EPC) for ${p.address} is expiring today. A renewal is required under UK compliance laws.\r\n`;
+    icsContent += "END:VEVENT\r\n";
+  });
+
+  icsContent += "END:VCALENDAR";
+
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'epc-renewal-reminders.ics';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 // Render metrics widgets & table body rows
 function updateDashboard() {
   const total = portfolio.length;
+  
   elements.btnClear.style.display = total > 0 ? 'inline-block' : 'none';
+  elements.btnExportPdf.style.display = total > 0 ? 'inline-block' : 'none';
 
   if (total === 0) {
     elements.statTotal.textContent = '0';
     elements.statNonCompliant.textContent = '0';
     elements.statFine.textContent = '£0';
     elements.statCompliant.textContent = '0';
+    elements.expiryAlertBanner.style.display = 'none';
     elements.ledgerBody.innerHTML = `
       <tr class="empty-state">
         <td colspan="6">
@@ -257,33 +408,51 @@ function updateDashboard() {
   // Calculate statistics
   let compliant = 0;
   let noncompliant = 0;
-  let errorCount = 0;
+  let projectedFine = 0;
 
   portfolio.forEach(p => {
-    if (p.error) {
-      errorCount++;
-      return;
-    }
+    if (p.error) return;
+    
     const rating = String(p.currentEnergyRating || '').toUpperCase();
+    const isCommercial = p.category === 'commercial';
+    const limit = isCommercial ? MEES_FINE_LIMIT_COMMERCIAL : MEES_FINE_LIMIT_DOMESTIC;
+
     if (rating === 'F' || rating === 'G') {
       noncompliant++;
+      projectedFine += limit;
     } else if (['A', 'B', 'C', 'D', 'E'].includes(rating)) {
       compliant++;
     }
   });
 
-  const totalAudit = compliant + noncompliant;
-  const projectedFine = noncompliant * MEES_FINE_LIMIT;
+  // Check Expiry Date limits (expiring within 12 months)
+  const today = new Date();
+  const nextYear = new Date();
+  nextYear.setFullYear(today.getFullYear() + 1);
 
-  // Render stats
+  const expiringCount = portfolio.filter(p => {
+    if (!p.certificateExpiry || p.certificateExpiry === 'N/A' || p.error) return false;
+    const expDate = new Date(p.certificateExpiry);
+    return expDate > today && expDate <= nextYear;
+  }).length;
+
+  if (expiringCount > 0) {
+    elements.expiryAlertCount.textContent = expiringCount;
+    elements.expiryAlertBanner.style.display = 'flex';
+  } else {
+    elements.expiryAlertBanner.style.display = 'none';
+  }
+
+  // Render main metrics
   elements.statTotal.textContent = total;
   elements.statNonCompliant.textContent = noncompliant;
   elements.statCompliant.textContent = compliant;
   elements.statFine.textContent = `£${projectedFine.toLocaleString('en-GB')}`;
 
-  // Highlight fine card if fines exist
+  // Highlight cards dynamically
   const fineCard = document.getElementById('metric-fine-card');
   const failedCard = document.getElementById('metric-failed-card');
+  
   if (projectedFine > 0) {
     fineCard.style.borderColor = 'var(--color-amber)';
     failedCard.style.borderColor = 'var(--color-red)';
@@ -296,7 +465,7 @@ function updateDashboard() {
   elements.ledgerBody.innerHTML = portfolio.map(p => {
     if (p.error) {
       return `
-        <tr>
+        <tr class="error-row">
           <td><strong style="color: var(--color-red-text);">${p.address || 'Error'}</strong></td>
           <td><code style="font-weight:bold;">${p.postcode}</code></td>
           <td><span class="rating-badge rating-N">?</span></td>
@@ -312,14 +481,22 @@ function updateDashboard() {
     const statusClass = isNonCompliant ? 'status-fail' : 'status-pass';
     const statusText = isNonCompliant ? 'Non-Compliant' : 'Pass';
 
+    // Verify if this specific row is expiring soon (adds custom CSS class)
+    let isExpiringSoon = false;
+    if (p.certificateExpiry && p.certificateExpiry !== 'N/A') {
+      const expDate = new Date(p.certificateExpiry);
+      isExpiringSoon = expDate > today && expDate <= nextYear;
+    }
+    const expiringClass = isExpiringSoon ? 'row-expiring-soon' : '';
+
     return `
-      <tr>
+      <tr class="clickable-row ${expiringClass}" onclick="showUpgradeDetails('${p.certificateNumber}', '${p.address.replace(/'/g, "\\'")}')">
         <td><strong>${p.address}</strong></td>
         <td><code>${p.postcode}</code></td>
         <td><span class="rating-badge rating-${rating}">${rating}</span></td>
         <td>
-          <strong>${p.currentEnergyEfficiency}</strong> / 
-          <span style="color: var(--text-secondary);">${p.potentialEnergyEfficiency}</span>
+          <strong>${p.currentEnergyEfficiency || 'N/A'}</strong> / 
+          <span style="color: var(--text-secondary);">${p.potentialEnergyEfficiency || 'N/A'}</span>
         </td>
         <td>${p.certificateExpiry}</td>
         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
