@@ -98,15 +98,31 @@ app.post('/api/check', async (req, res) => {
       const rows = rawData.data || [];
 
       // Attempt to find the best match for the specific address number/name
-      let match = rows[0]; // fallback to first property in postcode if no specific match
+      let match = null;
       if (address) {
         const numberMatch = address.match(/^\d+/);
         if (numberMatch) {
           const houseNum = numberMatch[0];
-          const regex = new RegExp(`\\b${houseNum}\\b`);
-          const found = rows.find(r => regex.test(String(r.addressLine1 || '')));
-          if (found) match = found;
+          // Look for:
+          // 1. Starts with house number: e.g. "9 Bankside"
+          // 2. Starts with Flat/Apartment/Unit + house number: e.g. "Flat 9"
+          // 3. Starts with house number + comma: e.g. "9, Bankside"
+          const regexes = [
+            new RegExp(`^${houseNum}\\b`, 'i'),
+            new RegExp(`\\b(flat|apartment|unit|room|suite|no|no.)\\s+${houseNum}\\b`, 'i'),
+            new RegExp(`^${houseNum},`, 'i')
+          ];
+          
+          match = rows.find(r => {
+            const addrStr = String(r.addressLine1 || '');
+            return regexes.some(rx => rx.test(addrStr));
+          });
         }
+      }
+
+      // If no strict address match was found, fallback to the first row in the postcode
+      if (!match && rows.length > 0) {
+        match = rows[0];
       }
 
       if (!match) {
