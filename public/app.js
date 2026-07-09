@@ -380,9 +380,17 @@ function downloadIcsCalendarEvents() {
 
 // Render metrics widgets & table body rows
 function updateDashboard() {
-  const total = portfolio.length;
+  const activeCategory = elements.categoryCommercial.checked ? 'commercial' : 'domestic';
   
-  elements.btnClear.style.display = total > 0 ? 'inline-block' : 'none';
+  // Filter portfolio based on the active category toggle selection
+  const filteredPortfolio = portfolio.filter(p => {
+    const cat = p.category || 'domestic';
+    return cat === activeCategory;
+  });
+
+  const total = filteredPortfolio.length;
+  
+  elements.btnClear.style.display = portfolio.length > 0 ? 'inline-block' : 'none';
   elements.btnExportPdf.style.display = total > 0 ? 'inline-block' : 'none';
 
   if (total === 0) {
@@ -396,8 +404,8 @@ function updateDashboard() {
         <td colspan="6">
           <div class="table-empty-message">
             <span class="empty-icon">🏢</span>
-            <h4>No properties audited yet</h4>
-            <p>Use the inputs panel on the left to scan a postcode or upload your property CSV database.</p>
+            <h4>No ${activeCategory === 'commercial' ? 'commercial' : 'residential'} properties audited yet</h4>
+            <p>Select the correct category or run an audit search to populate the ledger.</p>
           </div>
         </td>
       </tr>
@@ -410,11 +418,11 @@ function updateDashboard() {
   let noncompliant = 0;
   let projectedFine = 0;
 
-  portfolio.forEach(p => {
+  filteredPortfolio.forEach(p => {
     if (p.error) return;
     
     const rating = String(p.currentEnergyRating || '').toUpperCase();
-    const isCommercial = p.category === 'commercial';
+    const isCommercial = activeCategory === 'commercial';
     const limit = isCommercial ? MEES_FINE_LIMIT_COMMERCIAL : MEES_FINE_LIMIT_DOMESTIC;
 
     if (rating === 'F' || rating === 'G') {
@@ -430,7 +438,7 @@ function updateDashboard() {
   const nextYear = new Date();
   nextYear.setFullYear(today.getFullYear() + 1);
 
-  const expiringCount = portfolio.filter(p => {
+  const expiringCount = filteredPortfolio.filter(p => {
     if (!p.certificateExpiry || p.certificateExpiry === 'N/A' || p.error) return false;
     const expDate = new Date(p.certificateExpiry);
     return expDate > today && expDate <= nextYear;
@@ -462,7 +470,7 @@ function updateDashboard() {
   }
 
   // Render table rows
-  elements.ledgerBody.innerHTML = portfolio.map(p => {
+  elements.ledgerBody.innerHTML = filteredPortfolio.map(p => {
     if (p.error) {
       return `
         <tr class="error-row">
