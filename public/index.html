@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="A compliance dashboard to audit UK properties for EPC rating compliance and calculate potential MEES fine exposures." />
     <title>MEES Portfolio Risk Scanner — UK EPC Compliance Auditor</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232e8bff'><path d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z'/></svg>" />
+    <meta name="theme-color" content="#090d16" />
     <!-- Premium Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./styles.css" />
@@ -321,6 +324,17 @@
         </div>
       </div>
     </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+    <!-- FOOTER -->
+    <footer class="app-footer no-print">
+      <div class="footer-inner">
+        <span>EPC data sourced from the <a href="https://get-energy-performance-data.communities.gov.uk/" target="_blank" rel="noopener noreferrer">UK Government Get Energy Performance of Buildings Data portal</a> under the Open Government Licence.</span>
+        <span class="footer-right">MEES Risk Scanner &mdash; built for UK landlords &amp; property managers</span>
+      </div>
+    </footer>
 
     <script src="./app.js"></script>
   </body>
