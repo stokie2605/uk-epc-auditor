@@ -2,7 +2,7 @@
 
 An automated compliance dashboard designed for private landlords, property letting agents, and UK housing managers to scan property portfolios for Energy Performance Certificate (EPC) ratings, identify non-compliant properties, and project potential fine liabilities.
 
-![Dashboard Preview](./screenshot.jpg)
+![Dashboard Preview](./screenshot.png)
 
 ---
 
@@ -10,7 +10,7 @@ An automated compliance dashboard designed for private landlords, property letti
 
 Under the UK Government's **Minimum Energy Efficiency Standards (MEES)**, it is **unlawful** to let out a domestic property with an EPC rating of **F or G** (unless an official exemption is registered). 
 
-* **The Risk:** Landlords and local councils face financial penalties of **up to £5,000 per property** for failing to comply with MEES regulations.
+* **The Risk:** Landlords and local councils face financial penalties of **up to £5,000 per residential property and up to £150,000 per commercial property** for failing to comply with MEES regulations.
 * **The Solution:** This tracker automates property audits by matching address spreadsheets against the official UK Government EPC database, surfacing compliance risks before they lead to inspections or fines.
 
 ---
