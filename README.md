@@ -29,6 +29,10 @@ These values are not official EPC or SAP calculations. No government certificate
 
 ![Dashboard preview](screenshots/dashboard-preview.png)
 
+### Interface Themes (Dark & Light Mode)
+
+<img src="screenshots/dark-mode.png" width="340" alt="Dark Mode theme" /> <img src="screenshots/light-mode.png" width="340" alt="Light Mode theme" />
+
 ### Live Audit Workspace
 
 ![Live Audit preview](screenshots/live-audit-preview.png)
