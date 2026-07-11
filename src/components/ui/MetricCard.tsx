@@ -10,29 +10,21 @@ interface MetricCardProps {
 }
 
 export function MetricCard({
-  icon, iconBg = 'bg-primary-fixed dark:bg-dark-surface-container-high',
+  icon, iconBg = 'bg-primary/10 text-primary',
   label, value, trend, trendVariant = 'neutral',
   children, alert = false,
 }: MetricCardProps) {
   const trendColour =
-    trendVariant === 'positive' ? 'text-green-600 dark:text-green-400' :
-    trendVariant === 'negative' ? 'text-error dark:text-dark-error' :
-    'text-on-surface-variant dark:text-dark-on-surface-variant';
+    trendVariant === 'positive' ? 'text-green-400' :
+    trendVariant === 'negative' ? 'text-error' :
+    'text-on-surface-variant';
+
+  const valueColour = alert ? 'text-error' : 'text-primary';
 
   return (
-    <div className="relative bg-surface-container-lowest dark:bg-dark-surface-container-high
-                    border border-outline-variant dark:border-dark-outline-variant
-                    rounded-lg p-lg shadow-card overflow-hidden">
-      {/* Alert ping */}
-      {alert && (
-        <span className="absolute top-3 right-3 flex h-2 w-2">
-          <span className="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-error dark:bg-dark-error opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-error dark:bg-dark-error" />
-        </span>
-      )}
-
+    <div className="bg-surface-container-high border border-outline-variant rounded-lg p-lg shadow-lg relative overflow-hidden">
       <div className="flex justify-between items-start mb-sm">
-        <span className={`material-symbols-outlined text-primary dark:text-dark-primary ${iconBg} p-2 rounded`}>
+        <span className={`material-symbols-outlined p-2 rounded ${iconBg}`}>
           {icon}
         </span>
         {trend && (
@@ -40,10 +32,16 @@ export function MetricCard({
         )}
       </div>
 
-      <h3 className="text-on-surface-variant dark:text-dark-on-surface-variant text-label-caps uppercase tracking-wider mb-xs">
+      <h3 className="text-on-surface-variant font-label-caps uppercase tracking-wider mb-xs">
         {label}
       </h3>
-      <p className="text-4xl font-bold text-primary dark:text-dark-primary">{value}</p>
+      <p className={`text-4xl font-bold ${valueColour}`}>{value}</p>
+      
+      {/* Alert ping */}
+      {alert && (
+        <span className="flex h-2 w-2 rounded-full bg-error absolute top-3 right-3 animate-ping"></span>
+      )}
+
       {children}
     </div>
   );

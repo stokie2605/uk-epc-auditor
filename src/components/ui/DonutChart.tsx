@@ -7,8 +7,8 @@ interface DonutChartProps {
 
 export function DonutChart({
   percent,
-  stroke = '#091426',
-  trackStroke = '#e5eeff',
+  stroke = 'var(--color-primary)',
+  trackStroke = 'var(--color-surface-container)',
   size = 160,
 }: DonutChartProps) {
   // Radius 15.9155 baked into the SVG path literals below

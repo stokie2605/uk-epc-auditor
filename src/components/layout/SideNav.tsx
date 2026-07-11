@@ -2,9 +2,9 @@ import { NavLink, useLocation } from 'react-router-dom';
 
 const navItems = [
   { to: '/',             icon: 'dashboard',   label: 'Dashboard'   },
-  { to: '/audit',        icon: 'fact_check',  label: 'Live Audit'  },
-  { to: '/remediation',  icon: 'domain',      label: 'Remediation' },
+  { to: '/properties',   icon: 'domain',      label: 'Properties'  },
   { to: '/reports',      icon: 'assessment',  label: 'Reports'     },
+  { to: '/audit',        icon: 'fact_check',  label: 'Audits'      },
   { to: '/settings',     icon: 'settings',    label: 'Settings'    },
 ];
 
@@ -14,16 +14,13 @@ export function SideNav() {
   return (
     <>
       {/* ── Desktop Sidebar ──────────────────────────────────────────── */}
-      <aside className="hidden md:flex fixed top-0 left-0 h-full w-[240px] flex-col
-                         bg-surface-container-lowest border-r border-outline-variant
-                         dark:bg-dark-surface-container-lowest dark:border-dark-outline-variant
-                         py-lg px-md z-50">
+      <aside className="hidden md:flex fixed top-0 left-0 h-full w-[240px] flex-col bg-surface border-r border-outline-variant py-lg px-md z-50">
         {/* Logo */}
         <div className="mb-xl px-xs">
-          <h1 className="text-xl font-bold text-primary dark:text-dark-primary tracking-tight">
+          <h1 className="text-2xl font-bold text-primary font-display-lg tracking-tight">
             CompliancePro
           </h1>
-          <p className="text-on-surface-variant dark:text-dark-on-surface-variant text-xs font-medium uppercase tracking-wider mt-0.5">
+          <p className="text-on-surface-variant text-xs font-medium uppercase tracking-wider mt-1">
             UK Property Auditor
           </p>
         </div>
@@ -38,46 +35,46 @@ export function SideNav() {
               className={({ isActive }) =>
                 `flex items-center gap-md p-md rounded transition-all duration-150 active:scale-[0.98] ${
                   isActive
-                    ? 'bg-secondary-container text-on-secondary-container dark:bg-dark-surface-container-high dark:text-dark-primary font-semibold'
-                    : 'text-on-surface-variant dark:text-dark-on-surface-variant hover:bg-surface-container-high dark:hover:bg-dark-surface-container-high'
+                    ? 'bg-primary-container text-on-primary-container font-semibold'
+                    : 'text-on-surface-variant hover:bg-surface-container-high'
                 }`
               }
             >
               <span className="material-symbols-outlined">{icon}</span>
-              <span className="text-sm">{label}</span>
+              <span className="text-body-md">{label}</span>
             </NavLink>
           ))}
         </nav>
 
         {/* User profile footer */}
-        <div className="mt-auto border-t border-outline-variant dark:border-dark-outline-variant pt-lg flex items-center gap-md px-xs">
-          <div className="w-9 h-9 rounded-full bg-secondary-container dark:bg-dark-surface-container-high flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-on-secondary-container dark:text-dark-primary text-[18px]">
+        <div className="mt-auto border-t border-outline-variant pt-lg flex items-center gap-md px-xs">
+          <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center shrink-0 border border-outline">
+            <span className="material-symbols-outlined text-on-secondary-container text-[20px]">
               account_circle
             </span>
           </div>
           <div className="min-w-0">
-            <p className="font-semibold text-primary dark:text-dark-primary text-sm truncate">Auditor Profile</p>
-            <p className="text-xs text-on-surface-variant dark:text-dark-on-surface-variant">ID: UK-P44021</p>
+            <p className="font-semibold text-primary text-sm truncate">Organization Logo</p>
+            <p className="text-xs text-on-surface-variant">Admin Account</p>
           </div>
         </div>
       </aside>
 
       {/* ── Mobile Bottom Nav ─────────────────────────────────────────── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface-container-lowest dark:bg-dark-surface-container-lowest border-t border-outline-variant dark:border-dark-outline-variant flex items-center justify-around px-4 z-50">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface-container-lowest border-t border-outline-variant flex items-center justify-around px-4 z-50">
         {navItems.slice(0, 4).map(({ to, icon, label }) => {
           const isActive = pathname === to || (to !== '/' && pathname.startsWith(to));
           return (
             <NavLink
               key={to}
               to={to}
-              className={`flex flex-col items-center gap-0.5 ${
+              className={`flex flex-col items-center gap-1 ${
                 isActive
-                  ? 'text-primary dark:text-dark-primary'
-                  : 'text-on-surface-variant dark:text-dark-on-surface-variant'
+                  ? 'text-primary'
+                  : 'text-on-surface-variant'
               }`}
             >
-              <span className="material-symbols-outlined text-[22px]">{icon}</span>
+              <span className="material-symbols-outlined text-[20px]">{icon}</span>
               <span className="text-[10px] font-semibold">{label}</span>
             </NavLink>
           );

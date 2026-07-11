@@ -11,11 +11,9 @@ export function EpcBarChart({ distribution }: EpcBarChartProps) {
   const max = Math.max(...Object.values(distribution));
 
   return (
-    <div className="bg-surface-container-lowest dark:bg-dark-surface-container-high
-                    border border-outline-variant dark:border-dark-outline-variant
-                    rounded-lg p-lg shadow-card h-64 flex flex-col">
-      <h3 className="text-[10px] font-semibold text-on-surface-variant dark:text-dark-on-surface-variant uppercase tracking-wider mb-lg">
-        EPC Rating Distribution
+    <div className="bg-surface-container-high border border-outline-variant rounded-lg p-lg shadow-lg h-64 flex flex-col">
+      <h3 className="font-label-caps text-on-surface-variant mb-lg text-[10px] uppercase">
+        Rating Distribution
       </h3>
       <div className="flex-1 flex items-end justify-between gap-sm pt-md">
         {GRADES.map(grade => {
@@ -35,7 +33,7 @@ export function EpcBarChart({ distribution }: EpcBarChartProps) {
       </div>
       <div className="flex justify-between mt-sm">
         {GRADES.map(g => (
-          <span key={g} className="w-full text-center text-[10px] font-bold text-on-surface-variant dark:text-dark-on-surface-variant">
+          <span key={g} className="w-full text-center text-[10px] font-bold text-on-surface-variant">
             {g}
           </span>
         ))}

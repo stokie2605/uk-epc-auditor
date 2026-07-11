@@ -59,40 +59,37 @@ export function AuditWorkspacePage() {
   };
 
   return (
-    <div className="space-y-lg">
-      {/* Page header */}
-      <header>
-        <h1 className="text-2xl font-bold text-on-surface dark:text-dark-on-surface">Construction &amp; Insulation Details</h1>
-        <p className="text-sm text-on-surface-variant dark:text-dark-on-surface-variant mt-1">
-          Precisely document the building fabric to calculate thermal efficiency.
-        </p>
-      </header>
+    <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-lg">
+      {/* ── Form sections ─────────────────────────────────────────── */}
+      <div className="flex-1 space-y-lg">
+        <header className="mb-8">
+          <h1 className="font-headline-lg text-headline-lg text-on-surface mb-2">Construction & Insulation Details</h1>
+          <p className="text-on-surface-variant font-body-md">
+            Precisely document the building fabric to calculate thermal efficiency.
+          </p>
+        </header>
 
-      {submitted && (
-        <div className="flex items-center gap-3 p-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg text-green-800 dark:text-green-300 text-sm font-semibold">
-          <span className="material-symbols-outlined">check_circle</span>
-          Audit submitted successfully — ID: {submitted}
-        </div>
-      )}
-
-      <div className="flex flex-col lg:flex-row gap-lg">
-        {/* ── Form sections ─────────────────────────────────────────── */}
-        <div className="flex-1 space-y-lg">
-          <WallConstruction   form={form} onChange={handleChange} />
-          <FloorDetails       form={form} onChange={handleChange} />
-          <Glazing            form={form} onChange={handleChange} />
-          <HeatingControls    form={form} onChange={handleChange} />
-        </div>
-
-        {/* ── Live estimate sidebar ──────────────────────────────────── */}
-        {estimate && (
-          <LiveEstimatePanel
-            estimate={estimate}
-            onSubmit={handleSubmit}
-            submitting={submitting}
-          />
+        {submitted && (
+          <div className="flex items-center gap-3 p-md bg-green-500/10 border border-green-500/30 rounded-lg text-green-600 text-sm font-semibold mb-lg">
+            <span className="material-symbols-outlined">check_circle</span>
+            Audit submitted successfully — ID: {submitted}
+          </div>
         )}
+
+        <WallConstruction   form={form} onChange={handleChange} />
+        <FloorDetails       form={form} onChange={handleChange} />
+        <Glazing            form={form} onChange={handleChange} />
+        <HeatingControls    form={form} onChange={handleChange} />
       </div>
+
+      {/* ── Live estimate sidebar ──────────────────────────────────── */}
+      {estimate && (
+        <LiveEstimatePanel
+          estimate={estimate}
+          onSubmit={handleSubmit}
+          submitting={submitting}
+        />
+      )}
     </div>
   );
 }

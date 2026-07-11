@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A compliance dashboard to audit UK properties for EPC rating compliance and calculate potential MEES fine exposures." />
+    <title>MEES Portfolio Risk Scanner — UK EPC Compliance Auditor</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232e8bff'><path d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z'/></svg>" />
+    <meta name="theme-color" content="#090d16" />
+    <!-- Premium Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="min-h-screen">
+      <!-- HEADER -->
+      <header class="app-header no-print">
+        <div class="header-logo">
+          <!-- Premium SVG UK Flag -->
+          <div class="logo-flag-wrapper">
+            <svg viewBox="0 0 60 30" class="logo-uk-flag" aria-label="United Kingdom" role="img">
+              <clipPath id="uk-clip"><rect width="60" height="30"></rect></clipPath>
+              <g clip-path="url(#uk-clip)">
+                <rect width="60" height="30" fill="#012169"></rect>
+                <path d="M0,0 60,30 M60,0 0,30" stroke="#fff" stroke-width="6"></path>
+                <path d="M0,0 60,30 M60,0 0,30" stroke="#C8102E" stroke-width="4"></path>
+                <path d="M30,0 V30 M0,15 H60" stroke="#fff" stroke-width="10"></path>
+                <path d="M30,0 V30 M0,15 H60" stroke="#C8102E" stroke-width="6"></path>
+              </g>
+            </svg>
+          </div>
+          <div>
+            <div class="header-main-title">
+              <h1>MEES RISK SCANNER</h1>
+              <span class="header-org-tag">UK Gov Registry API Connected</span>
+            </div>
+            <p class="subtitle">UK EPC Property Compliance Auditor</p>
+          </div>
+        </div>
+        <div class="header-badge" id="api-status-badge">
+          <span class="badge-dot"></span>
+          <span id="api-status-text">Offline Demo Active</span>
+        </div>
+      </header>
+
+      <!-- PRINT SUMMARY HEADER -->
+      <div class="print-only">
+        <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 4px;">MEES Portfolio Compliance Audit</h1>
+        <p style="font-size: 12px; color: #666; margin-bottom: 20px;" id="print-timestamp">Generated on date</p>
+      </div>
+
+      <main class="mx-auto flex max-w-[1400px] flex-col gap-6 px-4 py-6 md:px-6">
+        <!-- METRICS GRID -->
+        <section class="metrics-grid" aria-label="Portfolio Metrics Summary">
+          <div class="metric-card card-total glow-info">
+            <div class="card-inner-header">
+              <span class="metric-label">Audited Properties</span>
+              <span class="card-icon text-info">🏢</span>
+            </div>
+            <strong class="metric-value font-mono text-foreground" id="stat-total">0</strong>
+            <span class="metric-subtext">Total active portfolio size</span>
+          </div>
+          
+          <div class="metric-card card-alert" id="metric-failed-card">
+            <div class="card-inner-header">
+              <span class="metric-label">Non-Compliant</span>
+              <span class="card-icon text-fail">⚠️</span>
+            </div>
+            <strong class="metric-value font-mono text-muted-foreground" id="stat-noncompliant">0</strong>
+            <span class="metric-subtext">Below MEES minimum (E)</span>
+          </div>
+          
+          <div class="metric-card card-fine" id="metric-fine-card">
+            <div class="card-inner-header">
+              <span class="metric-label">Est. Fine Exposure</span>
+              <span class="card-icon text-warn">£</span>
+            </div>
+            <strong class="metric-value font-mono text-muted-foreground" id="stat-fine">£0</strong>
+            <span class="metric-subtext" id="stat-fine-subtext">No penalty exposure</span>
+          </div>
+          
+          <div class="metric-card card-success" id="metric-success-card">
+            <div class="card-inner-header">
+              <span class="metric-label">Compliant</span>
+              <span class="card-icon text-pass">🛡️</span>
+            </div>
+            <strong class="metric-value font-mono text-muted-foreground" id="stat-compliant">0</strong>
+            <span class="metric-subtext">Meeting E or above</span>
+          </div>
+        </section>
+
+        <!-- MAIN CONTENT WORKSPACE -->
+        <div class="workspace-layout">
+          <!-- SIDEBAR CONTROL PANEL -->
+          <aside class="control-panel no-print">
+            <!-- Category Segmented Switcher -->
+            <div class="glass rounded-2xl border border-border p-1.5">
+              <div class="grid grid-cols-2 gap-1.5">
+                <button type="button" id="category-residential-btn" class="category-btn flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold capitalize transition-all duration-200 bg-info/15 text-info glow-info" aria-pressed="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home size-4"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                  residential
+                </button>
+                <button type="button" id="category-commercial-btn" class="category-btn flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold capitalize transition-all duration-200 text-muted-foreground hover:bg-secondary hover:text-foreground" aria-pressed="false">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-building size-4"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="16"></line><line x1="15" y1="22" x2="15" y2="16"></line><line x1="12" y1="16" x2="12" y2="22"></line><line x1="8" y1="6" x2="8.01" y2="6"></line><line x1="16" y1="6" x2="16.01" y2="6"></line><line x1="12" y1="6" x2="12.01" y2="6"></line><line x1="8" y1="11" x2="8.01" y2="11"></line><line x1="12" y1="11" x2="12.01" y2="11"></line><line x1="16" y1="11" x2="16.01" y2="11"></line></svg>
+                  commercial
+                </button>
+              </div>
+            </div>
+
+            <!-- Manual Property Form -->
+            <form id="single-check-form" class="glass flex flex-col gap-3 rounded-2xl border border-border p-4">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Manual Entry</h2>
+              
+              <label class="flex flex-col gap-1.5">
+                <span class="text-xs font-semibold text-muted-foreground">Property Address</span>
+                <input type="text" id="input-address" placeholder="e.g. 14 Kensington Court" class="input-field" />
+              </label>
+              
+              <div class="grid grid-cols-2 gap-3">
+                <label class="flex flex-col gap-1.5">
+                  <span class="text-xs font-semibold text-muted-foreground">Postcode <span class="required">*</span></span>
+                  <input type="text" id="input-postcode" placeholder="W8 5QF" required class="input-field font-mono uppercase" />
+                </label>
+                <label class="flex flex-col gap-1.5">
+                  <span class="text-xs font-semibold text-muted-foreground">EPC Rating</span>
+                  <select id="input-rating" class="input-field">
+                    <option value="A" class="bg-card">A</option>
+                    <option value="B" class="bg-card">B</option>
+                    <option value="C" class="bg-card">C</option>
+                    <option value="D" class="bg-card" selected>D</option>
+                    <option value="E" class="bg-card">E</option>
+                    <option value="F" class="bg-card">F</option>
+                    <option value="G" class="bg-card">G</option>
+                  </select>
+                </label>
+              </div>
+              
+              <button type="submit" class="mt-1 flex items-center justify-center gap-2 rounded-xl border border-info/40 bg-info/15 px-3 py-2.5 text-sm font-semibold text-info transition-all duration-200 hover:bg-info/25 hover:glow-info active:scale-[0.98]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus size-4"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add to Ledger
+              </button>
+            </form>
+
+            <!-- CSV Portfolio Upload -->
+            <div class="group flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed p-6 text-center transition-all duration-200 border-border bg-card/40 hover:border-info/50 hover:bg-info/5" id="drop-zone">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cloud-upload size-7 transition-colors text-muted-foreground group-hover:text-info"><path d="M12 13v8"></path><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="m8 17 4-4 4 4"></path></svg>
+              <div class="text-sm font-medium text-foreground">Drop CSV portfolio</div>
+              <div class="text-xs text-muted-foreground font-mono">address, postcode, category, rating, score, expiry</div>
+              <input type="file" id="file-input" accept=".csv" class="hidden" />
+            </div>
+
+            <!-- Load Sample Button (Convenient Demo Setup) -->
+            <button id="btn-load-sample" class="btn btn-secondary">Load Sample Mock Portfolio</button>
+
+            <!-- API registry / Mock settings card -->
+            <div class="glass flex flex-col gap-3 rounded-2xl border border-border p-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span id="data-source-icon" class="text-lg">🧪</span>
+                  <div>
+                    <div class="text-sm font-medium text-foreground">Data Source</div>
+                    <div class="text-xs text-muted-foreground" id="data-source-text">Mock / offline</div>
+                  </div>
+                </div>
+                <!-- Custom Switch Slider -->
+                <label class="switch-container">
+                  <input type="checkbox" id="mock-mode-toggle" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              
+              <!-- Access Code Input -->
+              <div id="access-code-wrapper" style="display: none; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 4px;">
+                <label for="input-access-code" class="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Admin Access Code</label>
+                <input type="password" id="input-access-code" placeholder="Enter Alsager2026 Code" class="input-field" />
+              </div>
+            </div>
+          </aside>
+
+          <!-- LEDGER DATA LIST & TABLE -->
+          <div class="ledger-main-container">
+            <!-- Expiry Warning Alert Banner -->
+            <div class="animate-banner-slide no-print flex flex-col gap-3 rounded-2xl border border-warn/40 bg-warn/10 p-4 glow-warn sm:flex-row sm:items-center sm:justify-between" id="expiry-alert-banner" style="display: none;">
+              <div class="flex items-start gap-3">
+                <div class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border border-warn/40 bg-warn/15">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-clock size-5 text-warn"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3.5"></path><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path><path d="M12 14v2.2l1.6 1"></path><circle cx="16" cy="16" r="5"></circle></svg>
+                </div>
+                <div>
+                  <p class="text-sm font-semibold text-warn">
+                    <span id="expiry-alert-count">0</span> certificates expiring within 12 months
+                  </p>
+                  <p class="text-xs text-warn/80" id="expiry-alert-soonest-text">
+                    Soonest expiry pending in portfolio.
+                  </p>
+                </div>
+              </div>
+              <button type="button" id="btn-export-ical" class="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-warn/50 bg-warn/15 px-3 py-2 text-sm font-semibold text-warn transition-all duration-200 hover:bg-warn/25 active:scale-[0.98]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-plus size-4"><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M21 11.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7.5"></path><path d="M3 10h18"></path><path d="M16 19h6"></path><path d="M19 16v6"></path></svg>
+                Export reminders
+              </button>
+            </div>
+
+            <!-- Properties Compliance Ledger Card -->
+            <div class="glass print-sheet rounded-2xl border border-border">
+              <!-- actions header -->
+              <div class="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 class="text-sm font-semibold text-foreground">Compliance Ledger</h2>
+                  <p class="text-xs text-muted-foreground" id="stat-ledger-subtext">0 properties audited</p>
+                </div>
+                <div class="no-print flex items-center gap-2">
+                  <button type="button" id="btn-export-pdf" class="flex items-center gap-2 rounded-xl border border-info/40 bg-info/10 px-3 py-2 text-xs font-semibold text-info transition-all duration-200 hover:bg-info/20 hover:glow-info active:scale-[0.98]" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer size-4"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                    Export PDF Report
+                  </button>
+                  <button type="button" id="btn-clear-ledger" class="flex items-center gap-2 rounded-xl border border-fail/40 bg-fail/10 px-3 py-2 text-xs font-semibold text-fail transition-all duration-200 hover:bg-fail/20 active:scale-[0.98]" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2 size-4"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    Clear Ledger
+                  </button>
+                </div>
+              </div>
+
+              <!-- Table list -->
+              <div class="overflow-x-auto">
+                <table class="w-full min-w-[640px] border-collapse text-left">
+                  <thead>
+                    <tr class="text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
+                      <th class="px-4 py-3 font-medium">Property</th>
+                      <th class="px-4 py-3 font-medium">Postcode</th>
+                      <th class="px-4 py-3 font-medium">Type</th>
+                      <th class="px-4 py-3 text-center font-medium">Rating</th>
+                      <th class="px-4 py-3 font-medium">Expiry</th>
+                      <th class="px-4 py-3 font-medium">Status</th>
+                      <th class="px-4 py-3 no-print" />
+                    </tr>
+                  </thead>
+                  <tbody id="ledger-body">
+                    <tr class="empty-state">
+                      <td colspan="7">
+                        <div class="flex flex-col items-center gap-3 px-4 py-16 text-center">
+                          <span class="text-4xl text-muted-foreground">🗂️</span>
+                          <p class="text-sm font-medium text-foreground">Ledger is empty</p>
+                          <p class="max-w-xs text-xs text-muted-foreground">
+                            Add a property manually or drop a CSV portfolio in the sidebar to begin scanning for MEES risk.
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- UPGRADE SLIDE-OUT ACTION PLAN DRAWER -->
+      <div id="recommendations-modal" class="fixed inset-0 z-50 no-print" style="display: none;" role="dialog" aria-modal="true" aria-label="Upgrade action plan">
+        <div class="absolute inset-0 bg-background/70 backdrop-blur-sm" id="modal-backdrop"></div>
+        <div class="animate-drawer-in absolute right-0 top-0 flex h-full w-full max-w-md flex-col border-l border-border bg-card shadow-2xl">
+          <!-- Header -->
+          <div class="flex items-start justify-between gap-4 border-b border-border p-5">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-info">Upgrade Action Plan</p>
+              <h2 class="mt-1 text-base font-semibold text-foreground text-pretty" id="modal-property-address">Address Line</h2>
+              <p class="font-mono text-xs text-muted-foreground" id="modal-property-meta">Postcode · Type</p>
+            </div>
+            <button type="button" id="btn-close-modal" class="rounded-lg border border-border p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" aria-label="Close">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x size-4"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+
+          <!-- Body contents -->
+          <div class="flex-1 overflow-y-auto p-5">
+            <!-- rating comparison -->
+            <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border border-border bg-secondary/40 p-4">
+              <div class="flex flex-col items-center gap-2">
+                <span class="text-xs text-muted-foreground">Current</span>
+                <span id="modal-rating-current" class="inline-flex items-center justify-center rounded-full border font-mono font-bold leading-none size-14 text-2xl">?</span>
+              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right size-5 text-info"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              <div class="flex flex-col items-center gap-2">
+                <span class="text-xs text-muted-foreground">Potential</span>
+                <span id="modal-rating-potential" class="inline-flex items-center justify-center rounded-full border font-mono font-bold leading-none size-14 text-2xl">?</span>
+              </div>
+            </div>
+
+            <!-- exposure callout -->
+            <div id="modal-exposure-callout" class="mt-4 flex items-center gap-3 rounded-xl border border-fail/40 bg-fail/10 p-3" style="display: none;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trending-up size-4 shrink-0 text-fail"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+              <p class="text-xs text-fail">
+                Currently non-compliant with an estimated <span id="modal-exposure-amount" class="font-semibold">£0</span> penalty exposure. Completing this plan clears the risk.
+              </p>
+            </div>
+
+            <!-- summary cost stats -->
+            <div class="mt-4 grid grid-cols-2 gap-3">
+              <div class="rounded-xl border border-border bg-secondary/40 p-3">
+                <div class="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet size-4 text-info"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
+                  Est. total cost
+                </div>
+                <div id="modal-total-cost" class="font-mono text-lg font-bold text-foreground">£0</div>
+              </div>
+              
+              <div class="rounded-xl border border-border bg-secondary/40 p-3">
+                <div class="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-piggy-bank size-4 text-pass"><path d="M19 5c.5 0 1 .5 1 1v2c0 .5-.5 1-1 1H4a2 2 0 0 1-2-2V6c0-.5.5-1 1-1h15Z"></path><path d="M2 9v10a2 2 0 0 0 2 2h15a2 2 0 0 0 2-2V9"></path><path d="M20 9v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9"></path><path d="M6 14v4"></path><path d="M10 14v4"></path><path d="M14 14v4"></path></svg>
+                  Annual bill saving
+                </div>
+                <div id="modal-annual-saving" class="font-mono text-lg font-bold text-pass">£0</div>
+              </div>
+            </div>
+
+            <!-- recommended steps list -->
+            <h3 class="mb-3 mt-6 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Recommended upgrade path
+            </h3>
+            <ol id="modal-recommendations-list" class="flex flex-col gap-3">
+              <!-- Dynamic Upgrade steps are injected here -->
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+    <!-- FOOTER -->
+    <footer class="app-footer no-print">
+      <div class="footer-inner">
+        <span>EPC data sourced from the <a href="https://get-energy-performance-data.communities.gov.uk/" target="_blank" rel="noopener noreferrer">UK Government Get Energy Performance of Buildings Data portal</a> under the Open Government Licence.</span>
+        <span class="footer-right">MEES Risk Scanner &mdash; built for UK landlords &amp; property managers</span>
+      </div>
+    </footer>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
