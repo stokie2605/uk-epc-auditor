@@ -3,109 +3,57 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block');
 
-@config "../tailwind.config.ts";
-
 :root {
-  --color-tertiary-container: #35260c;
-  --color-outline-variant: #c5c6cd;
-  --color-error-container: #ffdad6;
-  --color-on-tertiary-fixed-variant: #564427;
-  --color-on-surface-variant: #45474c;
-  --color-surface-container-highest: #d3e4fe;
-  --color-secondary: #515f74;
-  --color-tertiary-fixed-dim: #ddc39d;
-  --color-error: #ba1a1a;
-  --color-outline: #75777d;
-  --color-surface-container-low: #eff4ff;
-  --color-inverse-surface: #213145;
-  --color-surface-tint: #545f73;
-  --color-on-secondary-container: #57657b;
-  --color-on-primary-fixed-variant: #3c475a;
-  --color-on-primary-fixed: #111c2d;
-  --color-surface-container: #e5eeff;
-  --color-on-primary: #ffffff;
-  --color-on-error: #ffffff;
-  --color-on-background: #0b1c30;
-  --color-primary-fixed: #d8e3fb;
-  --color-surface-container-high: #dce9ff;
-  --color-tertiary: #1e1200;
-  --color-surface-bright: #f8f9ff;
-  --color-on-tertiary-fixed: #271902;
-  --color-on-surface: #0b1c30;
-  --color-inverse-primary: #bcc7de;
-  --color-surface: #f8f9ff;
-  --color-primary-container: #1e293b;
-  --color-secondary-container: #d5e3fd;
-  --color-primary-fixed-dim: #bcc7de;
-  --color-tertiary-fixed: #fadfb8;
-  --color-background: #f8f9ff;
-  --color-on-error-container: #93000a;
-  --color-surface-container-lowest: #ffffff;
-  --color-on-secondary-fixed: #0d1c2f;
-  --color-surface-variant: #d3e4fe;
-  --color-inverse-on-surface: #eaf1ff;
-  --color-on-secondary-fixed-variant: #3a485c;
-  --color-primary: #091426;
-  --color-surface-dim: #cbdbf5;
-  --color-secondary-fixed: #d5e3fd;
-  --color-on-secondary: #ffffff;
-  --color-on-tertiary: #ffffff;
-  --color-on-primary-container: #8590a6;
-  --color-secondary-fixed-dim: #b9c7e0;
-  --color-on-tertiary-container: #a38c6a;
+  /* Premium Dark Theme Default Tokens (Force App Theme) */
+  --color-background: #020617;
+  --color-surface: #0b0f19;
+  --color-surface-container: #0e1424;
+  --color-surface-container-high: #151c33;
+  --color-surface-container-lowest: #020617;
+  
+  --color-primary: #38bdf8;
+  --color-primary-container: rgba(56, 189, 248, 0.1);
+  --color-on-primary-container: #38bdf8;
+  
+  --color-secondary: #0ea5e9;
+  --color-secondary-container: rgba(14, 165, 233, 0.1);
+  
+  --color-on-background: #f8fafc;
+  --color-on-surface: #f8fafc;
+  --color-on-surface-variant: #94a3b8;
+  
+  --color-outline: #1e293b;
+  --color-outline-variant: #334155;
+  --color-error: #f43f5e;
 }
 
+/* Also ensure matching .dark block mappings for insurance */
 .dark {
-  --color-on-primary-fixed-variant: #004c69;
-  --color-on-tertiary-fixed: #2a1700;
-  --color-inverse-primary: #00668a;
-  --color-on-surface: #dae2fd;
-  --color-surface-bright: #31394d;
-  --color-inverse-on-surface: #283044;
-  --color-outline: #87929a;
-  --color-tertiary: #ffc176;
-  --color-secondary-fixed-dim: #b9c8de;
-  --color-on-secondary-container: #a7b6cc;
-  --color-primary-container: #38bdf8;
-  --color-surface-container: #171f33;
-  --color-on-secondary-fixed: #0d1c2f;
-  --color-on-error-container: #ffdad6;
-  --color-inverse-surface: #dae2fd;
-  --color-primary-fixed: #c4e7ff;
-  --color-error: #ffb4ab;
-  --color-surface-container-high: #222a3d;
-  --color-surface-tint: #7bd0ff;
-  --color-secondary-fixed: #d4e4fa;
-  --color-on-tertiary-container: #613b00;
-  --color-on-surface-variant: #bdc8d1;
-  --color-on-primary: #00354a;
-  --color-surface-container-highest: #2d3449;
-  --color-on-primary-fixed: #001e2c;
-  --color-surface-container-low: #131b2e;
-  --color-surface: #0b1326;
-  --color-error-container: #93000a;
-  --color-on-tertiary-fixed-variant: #653e00;
-  --color-tertiary-fixed: #ffddb8;
-  --color-tertiary-container: #f1a02b;
-  --color-on-secondary: #233143;
-  --color-secondary-container: #39485a;
-  --color-on-primary-container: #004965;
-  --color-on-error: #690005;
-  --color-on-background: #dae2fd;
-  --color-outline-variant: #3e484f;
-  --color-primary: #8ed5ff;
-  --color-tertiary-fixed-dim: #ffb960;
-  --color-surface-variant: #2d3449;
-  --color-secondary: #b9c8de;
-  --color-primary-fixed-dim: #7bd0ff;
-  --color-on-secondary-fixed-variant: #39485a;
-  --color-surface-container-lowest: #060e20;
-  --color-surface-dim: #0b1326;
-  --color-background: #0b1326;
-  --color-on-tertiary: #472a00;
+  --color-background: #020617;
+  --color-surface: #0b0f19;
+  --color-surface-container: #0e1424;
+  --color-surface-container-high: #151c33;
+  --color-surface-container-lowest: #020617;
+  --color-primary: #38bdf8;
+  --color-primary-container: rgba(56, 189, 248, 0.1);
+  --color-on-primary-container: #38bdf8;
+  --color-on-background: #f8fafc;
+  --color-on-surface: #f8fafc;
+  --color-on-surface-variant: #94a3b8;
+  --color-outline: #1e293b;
+  --color-outline-variant: #334155;
 }
 
-/* ── Material Symbols baseline ────────────────────────────────────── */
+/* ── Global Style Overrides ─────────────────────────────────────────── */
+body {
+  background-color: var(--color-background);
+  color: var(--color-on-surface);
+  /* Modern technical layout micro dot-grid blueprint background */
+  background-image: radial-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ── Material Symbols Baseline ────────────────────────────────────── */
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   font-size: 20px;
@@ -113,26 +61,12 @@
   user-select: none;
 }
 
-/* ── EPC Badge ────────────────────────────────────────────────────── */
-.epc-badge {
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-weight: 800;
-  font-size: 13px;
-  letter-spacing: -0.01em;
-}
-
-/* ── Custom scrollbar ─────────────────────────────────────────────── */
+/* ── Custom Scrollbar ─────────────────────────────────────────────── */
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: var(--color-surface-container); }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--color-outline-variant); border-radius: 10px; }
 
-/* ── SVG donut chart animation ────────────────────────────────────── */
+/* ── SVG Donut Chart Animation ────────────────────────────────────── */
 @keyframes progress {
   0% { stroke-dasharray: 0, 100; }
 }
@@ -141,9 +75,9 @@
   stroke-linecap: round;
 }
 
-/* ── Page transition fade ─────────────────────────────────────────── */
+/* ── Page Transition Fade ─────────────────────────────────────────── */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.page-enter { animation: fadeIn 0.25s ease-out forwards; }
+.page-enter { animation: fadeIn 0.2s ease-out forwards; }
