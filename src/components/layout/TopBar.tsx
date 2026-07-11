@@ -17,18 +17,18 @@ export function TopBar({ onToggleDark, isDark }: TopBarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex items-center justify-between h-16 px-xl
+    <header className="sticky top-0 z-40 flex items-center justify-between h-16 px-6
                         ml-0 md:ml-[240px]
-                        bg-surface-container-lowest
-                        border-b border-outline-variant
+                        bg-surface/80 backdrop-blur-md
+                        border-b border-outline
                         shadow-sm">
       {/* Left: title + search */}
-      <div className="flex flex-1 items-center gap-xl w-1/2">
-        <h2 className="hidden lg:block text-xl font-bold text-primary font-headline-md whitespace-nowrap">
+      <div className="flex flex-1 items-center gap-6 max-w-xl">
+        <h2 className="hidden lg:block text-base font-bold text-on-surface whitespace-nowrap tracking-tight">
           Compliance Manager
         </h2>
-        <form onSubmit={handleSearch} className="relative w-full max-w-md">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">
+        <form onSubmit={handleSearch} className="relative w-full">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">
             search
           </span>
           <input
@@ -36,43 +36,43 @@ export function TopBar({ onToggleDark, isDark }: TopBarProps) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search by UPRN or Postcode..."
-            className="w-full bg-surface-container border border-outline-variant rounded-lg pl-10 py-1.5 text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:outline-none transition-all placeholder:text-on-surface-variant/50"
+            className="w-full bg-surface-container border border-outline rounded-lg pl-10 pr-4 py-1.5 text-sm text-on-surface focus:border-primary focus:outline-none transition-all placeholder:text-on-surface-variant/40"
           />
         </form>
       </div>
 
       {/* Right: dark toggle + notifications + user */}
-      <div className="flex items-center gap-lg">
+      <div className="flex items-center gap-4">
         {/* Dark mode toggle */}
         <button
           id="dark-mode-toggle"
           onClick={onToggleDark}
           aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-          className="p-2 rounded-full hover:bg-surface-container transition-colors"
+          className="p-2 rounded-lg hover:bg-surface-container transition-colors text-on-surface-variant hover:text-on-surface"
         >
           {isDark
-            ? <Sun  className="w-5 h-5 text-primary" />
-            : <Moon className="w-5 h-5 text-on-surface-variant" />
+            ? <Sun  className="w-[18px] h-[18px] text-primary" />
+            : <Moon className="w-[18px] h-[18px]" />
           }
         </button>
 
         {/* Notifications */}
         <button
           id="notifications-btn"
-          className="p-2 rounded-full hover:bg-surface-container transition-colors relative"
+          className="p-2 rounded-lg hover:bg-surface-container transition-colors relative text-on-surface-variant hover:text-on-surface"
           aria-label="Notifications"
         >
-          <span className="material-symbols-outlined text-on-surface-variant">
+          <span className="material-symbols-outlined text-[20px]">
             notifications
           </span>
-          <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface-container-lowest animate-ping-slow" />
+          <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-error rounded-full ring-1 ring-surface" />
         </button>
 
         {/* Auditor chip */}
-        <div className="hidden sm:flex items-center gap-md border-l border-outline-variant pl-lg">
+        <div className="hidden sm:flex items-center gap-4 border-l border-outline pl-4 h-6">
           <div className="text-right">
-            <p className="font-semibold text-primary text-sm">Auditor Profile</p>
-            <p className="text-xs text-on-surface-variant">ID: UK-P44021</p>
+            <p className="font-semibold text-on-surface text-xs">Auditor Profile</p>
+            <p className="text-[10px] text-on-surface-variant font-mono">ID: UK-P44021</p>
           </div>
         </div>
       </div>
