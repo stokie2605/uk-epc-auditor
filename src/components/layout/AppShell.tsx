@@ -9,11 +9,12 @@ interface AppShellProps {
 
 export function AppShell({ isDark, onToggleDark }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-background dark:bg-dark-background text-on-surface dark:text-dark-on-surface font-sans">
+    <div className="min-h-screen bg-background text-on-surface font-sans">
       <SideNav />
       <TopBar isDark={isDark} onToggleDark={onToggleDark} />
-      <main className="md:ml-[240px] pb-16 md:pb-0">
-        <div className="p-xl max-w-[1440px] mx-auto page-enter">
+      <main className="md:ml-[240px] pb-24 md:pb-8 animate-fade-in">
+        {/* Adjusted padding container to native rem scales for robust v4 support */}
+        <div className="p-6 md:p-8 max-w-[1440px] mx-auto page-enter">
           <Outlet />
         </div>
       </main>
