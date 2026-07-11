@@ -9,8 +9,7 @@ import { EpcBarChart } from '../components/dashboard/EpcBarChart';
 
 type SummaryWithMeta = PortfolioSummary & { professionalSummary: string };
 
-// Safeguard fallback using type assertion to satisfy the rigid internal structure cleanly
-const MOCK_SUMMARY_FALLBACK = {
+const MOCK_SUMMARY_FALLBACK: SummaryWithMeta = {
   totalAudited: 1240,
   totalAuditedTrend: '+12% this month',
   averageEpcScore: 68,
@@ -29,9 +28,9 @@ const MOCK_ALERTS_FALLBACK = [
 
 const MOCK_LEDGER_FALLBACK = {
   properties: [
-    { address: '102 High Street, Crewe', currentEpc: 'E', targetEpc: 'C', dateAudited: '2026-07-01' },
-    { address: '44 Victoria Road, Alsager', currentEpc: 'D', targetEpc: 'C', dateAudited: '2026-06-28' },
-    { address: '88 London Road, Nantwich', currentEpc: 'F', targetEpc: 'D', dateAudited: '2026-07-05' }
+    { address: '102 High Street, Crewe', currentEpc: 'E', targetEpc: 'C', dateAudited: '2026-07-01', status: 'Pending' },
+    { address: '44 Victoria Road, Alsager', currentEpc: 'D', targetEpc: 'C', dateAudited: '2026-06-28', status: 'Compliant' },
+    { address: '88 London Road, Nantwich', currentEpc: 'F', targetEpc: 'D', dateAudited: '2026-07-05', status: 'Urgent' }
   ],
   total: 3
 } as any;
@@ -50,8 +49,7 @@ export function DashboardPage() {
         setSummary((s || MOCK_SUMMARY_FALLBACK) as SummaryWithMeta);
         setAlerts(a && a.length ? a : MOCK_ALERTS_FALLBACK);
       })
-      .catch((err) => {
-        console.warn("Backend API offline. Applying premium UI defaults:", err);
+      .catch(() => {
         setSummary(MOCK_SUMMARY_FALLBACK);
         setAlerts(MOCK_ALERTS_FALLBACK);
       })
@@ -72,8 +70,8 @@ export function DashboardPage() {
 
   if (loading || !summary) {
     return (
-      <div className="flex items-center justify-center h-64 bg-surface-container/30 rounded-xl">
-        <span className="material-symbols-outlined text-4xl text-primary animate-spin">
+      <div className="flex items-center justify-center h-64 bg-surface border border-outline rounded-xl">
+        <span className="material-symbols-outlined text-3xl text-primary animate-spin">
           progress_activity
         </span>
       </div>
@@ -81,12 +79,12 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="space-y-xl">
+    <div className="space-y-6">
       {/* ── Metric Cards ─────────────────────────────────────────────── */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <MetricCard
           icon="domain"
-          iconBg="bg-primary/10 text-primary"
+          iconBg="bg-primary-container text-primary"
           label="Total Properties Audited"
           value={summary.totalAudited.toLocaleString()}
           trend={summary.totalAuditedTrend}
@@ -94,46 +92,46 @@ export function DashboardPage() {
         />
         <MetricCard
           icon="speed"
-          iconBg="bg-secondary/10 text-secondary"
+          iconBg="bg-secondary-container text-secondary"
           label="Average EPC Score"
           value={summary.averageEpcScore}
           trend={`Standard: ${summary.averageEpcGrade}`}
         >
-          <div className="flex items-baseline gap-sm mt-xs">
+          <div className="flex items-center gap-2 mt-2">
             <EpcBadge grade={summary.averageEpcGrade} size="md" />
-            <span className="text-xs font-bold bg-surface-container text-on-surface px-sm py-0.5 rounded border border-outline-variant">
+            <span className="text-xs font-bold bg-surface-container text-on-surface px-2 py-0.5 rounded border border-outline">
               Band {summary.averageEpcGrade}
             </span>
           </div>
         </MetricCard>
         <MetricCard
           icon="warning"
-          iconBg="bg-error/10 text-error"
+          iconBg="rgba(244, 63, 94, 0.1) text-error"
           label="Pending Remediations"
           value={summary.pendingRemediations}
           alert
         >
-          <div className="mt-xs text-error font-medium text-xs flex items-center gap-1">
+          <div className="mt-2 text-error font-medium text-xs flex items-center gap-1">
             Action Required Immediately
           </div>
         </MetricCard>
       </section>
 
       {/* ── Audit Ledger + Portfolio Health ──────────────────────────── */}
-      <section className="grid grid-cols-1 lg:grid-cols-4 gap-gutter items-start">
-        {ledger ? (
-          <div className="lg:col-span-3">
+      <section className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+        <div className="lg:col-span-3 bg-surface border border-outline rounded-xl p-6 shadow-sm">
+          {ledger ? (
             <AuditLedger
               properties={ledger.properties}
               total={ledger.total}
               page={page}
               onPageChange={setPage}
             />
-          </div>
-        ) : (
-          <div className="lg:col-span-3 h-48 animate-pulse bg-surface-container rounded-xl" />
-        )}
-        <div className="lg:col-span-1">
+          ) : (
+            <div className="h-48 animate-pulse bg-surface-container rounded-lg" />
+          )}
+        </div>
+        <div className="lg:col-span-1 bg-surface border border-outline rounded-xl p-6 shadow-sm">
           <PortfolioHealth
             compliancePercent={summary.compliancePercent}
             quarterlyTarget={summary.quarterlyTarget}
@@ -144,21 +142,26 @@ export function DashboardPage() {
       </section>
 
       {/* ── EPC Chart + Summary ────────────────────────────────────── */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-gutter">
-        <EpcBarChart distribution={summary.epcDistribution} />
-        <div className="bg-surface-container border border-outline-variant rounded-xl p-lg shadow-sm flex flex-col justify-center text-on-surface">
-          <h3 className="text-xl font-bold mb-md font-display-lg text-primary">Professional Summary</h3>
-          <p className="text-sm text-on-surface-variant mb-lg leading-relaxed">
-            {summary.professionalSummary}
-          </p>
-          <div className="flex gap-lg border-t border-outline-variant/60 pt-md mt-xs">
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-surface border border-outline rounded-xl p-6 shadow-sm">
+          <EpcBarChart distribution={summary.epcDistribution} />
+        </div>
+        
+        <div className="bg-surface border border-outline rounded-xl p-6 shadow-sm flex flex-col justify-between text-on-surface">
+          <div>
+            <h3 className="text-base font-bold mb-3 text-primary tracking-tight">Professional Summary</h3>
+            <p className="text-sm text-on-surface-variant leading-relaxed">
+              {summary.professionalSummary}
+            </p>
+          </div>
+          <div className="flex gap-6 border-t border-outline/60 pt-4 mt-4">
             {[
               { icon: 'analytics', label: 'Real-time Sync' },
               { icon: 'security',  label: 'ISO 27001' },
             ].map(({ icon, label }) => (
-              <div key={label} className="flex items-center gap-sm text-on-surface-variant">
-                <span className="material-symbols-outlined text-sm text-secondary">{icon}</span>
-                <span className="text-xs font-semibold">{label}</span>
+              <div key={label} className="flex items-center gap-2 text-on-surface-variant">
+                <span className="material-symbols-outlined text-[18px] text-secondary">{icon}</span>
+                <span className="text-xs font-medium">{label}</span>
               </div>
             ))}
           </div>
