@@ -3,8 +3,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block');
 
-:root {
-  /* Premium Dark Theme Default Tokens (Force App Theme) */
+/* ── Tailwind v4 Theme Variable Registration Engine ──────────────── */
+@theme {
   --color-background: #020617;
   --color-surface: #0b0f19;
   --color-surface-container: #0e1424;
@@ -27,28 +27,10 @@
   --color-error: #f43f5e;
 }
 
-/* Also ensure matching .dark block mappings for insurance */
-.dark {
-  --color-background: #020617;
-  --color-surface: #0b0f19;
-  --color-surface-container: #0e1424;
-  --color-surface-container-high: #151c33;
-  --color-surface-container-lowest: #020617;
-  --color-primary: #38bdf8;
-  --color-primary-container: rgba(56, 189, 248, 0.1);
-  --color-on-primary-container: #38bdf8;
-  --color-on-background: #f8fafc;
-  --color-on-surface: #f8fafc;
-  --color-on-surface-variant: #94a3b8;
-  --color-outline: #1e293b;
-  --color-outline-variant: #334155;
-}
-
 /* ── Global Style Overrides ─────────────────────────────────────────── */
 body {
   background-color: var(--color-background);
   color: var(--color-on-surface);
-  /* Modern technical layout micro dot-grid blueprint background */
   background-image: radial-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px);
   background-size: 24px 24px;
 }
